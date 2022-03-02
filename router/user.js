@@ -1,5 +1,5 @@
 const express = require('express')
-var AccountModel = require("../models/account.js")
+var UserModel = require("../models/user.js")
 var TokenModel = require("../models/token.js")
 var jwt = require('jsonwebtoken');
 const { json } = require('body-parser');
@@ -13,69 +13,115 @@ router.get("/:id", (req, res) => {
 })
 
 router.get("/", (req, res, next) => {
-    var page = req.query.page
+    var page = req.body.page
     if (page) {
-        page = parseInt(req.query.page)
+        page = parseInt(page)
         if (page < 1) {
             page = 1
         }
         var skip = (page - 1) * PAGE_SIZE
-        AccountModel.find({})
+        UserModel.find({})
             .skip(skip)
             .limit(PAGE_SIZE)
             .then(data => {
-                res.json(data)
+                UserModel.countDocuments({}).then((total) => {
+                    var tongSoPage = Math.ceil(total / PAGE_SIZE)
+                    return res.json({
+                        'total': total,
+                        'total_page': tongSoPage,
+                        'message': 'Success',
+                        'data': data
+                    })
+                })
             })
             .catch(err => {
-                res.json("loi phan trang")
+                return res.json({
+                    'message': 'Loi phan trang !',
+                    'data': []
+                })
             })
     }
     else {
-        AccountModel.find({})
+        UserModel.find({})
             .then(data => {
-                res.json(data)
+                UserModel.countDocuments({}).then((total) => {
+                    var tongSoPage = Math.ceil(total / PAGE_SIZE)
+                    return res.json({
+                        'total': total,
+                        'total_page': tongSoPage,
+                        'message': 'Success',
+                        'data': data
+                    })
+                })
             })
             .catch(err => {
-                res.json("loi")
+                return res.json({
+                    'message': 'Contact admin for support',
+                    'data': []
+                })
             })
     }
 })
 
+// Dang ky tai khoan
 router.post("/register", (req, res) => {
     var username = req.body.username
     var password = req.body.password
+    var fullname = req.body.fullname || ''
+    var gender = req.body.gender || ''
+    var phone = req.body.phone || ''
+    var role = req.body.role || 'CUSTOMER'
 
-    AccountModel.findOne({
+    if (!username || !password) {
+        return res.json({
+            'message': 'Vui long nhap day du thong tin username, password !',
+            'data': []
+        })
+    }
+
+    UserModel.findOne({
         username: username
     })
         .then(data => {
             if (data) {
-                res.json("username da ton tai")
+                return res.json({
+                    'message': 'Username da ton tai!',
+                    'data': []
+                })
             }
             else {
-                AccountModel.create({
+                UserModel.create({
                     username: username,
-                    password: password
+                    password: password,
+                    fullname: fullname,
+                    gender: gender,
+                    phone: phone,
+                    role: role
                 })
-                res.json("tao thanh cong")
+                var token = jwt.sign({ 'username': username }, 'secret')
+                // var dulieu = jwt.verify(token, 'secret')
+                // console.log(dulieu)
+                TokenModel.create({
+                    token: token,
+                    username: username,
+                    status: true
+                })
+                    .then(data => {
+                        return res.json({
+                            'token': token,
+                            'message': 'Tao thanh cong',
+                            'data': []
+                        })
+                    })
             }
         })
 })
 
+// update tai khoan
 router.post("/update", (req, res) => {
     var id = req.body.id
     var password = req.body.password
-    // AccountModel.findByIdAndUpdate(id, {
-    //     password: password
-    // })
-    //     .then(data => {
-    //         res.json("update thanh cong")
-    //     })
-    //     .catch(err => {
-    //         res.json("update that bai")
-    //     })
-
-    AccountModel.findOneAndUpdate({
+    UserModel.findOneAndUpdate({
         _id: id
     },
         {
@@ -89,10 +135,11 @@ router.post("/update", (req, res) => {
         })
 })
 
+// Dang nhap
 router.post('/login', (req, res, next) => {
     var username = req.body.username
     var password = req.body.password
-    AccountModel.findOne({
+    UserModel.findOne({
         username: username,
         password: password
     })
@@ -124,6 +171,7 @@ router.post('/login', (req, res, next) => {
 
 })
 
+// get profile
 router.post('/profile', (req, res, next) => {
     token = req.body.token
     TokenModel.findOne({

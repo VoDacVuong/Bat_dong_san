@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-mongoose.connect('mongodb://localhost/demo_nodejs');
+mongoose.connect('mongodb://localhost/BDS');
 
 const Schema = mongoose.Schema;
 
