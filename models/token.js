@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
-mongoose.connect('mongodb://localhost/BDS');
+mongoURL = process.env.mongoURL || 'mongodb://localhost/BDS'
+mongoose.connect(mongoURL);
 
 const Schema = mongoose.Schema;
 

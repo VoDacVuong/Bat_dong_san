@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  node:
+    container_name: node_server
+    build:
+      context: .
+      dockerfile: ./docker/Dockerfile
+    ports:
+      - 8000:8000
+    volumes:
+      - .:/app
+    command: npm start
+    networks:
+      - default
+    environment:
+      PORT: 8000
+      MONGO_URL: 'mongodb://localhost/BDS'
+      NODE_ENV: 'development'
+  mongo:
+    container_name: mongo
+    image: mongo
+    ports:
+      - 27017:27017
+    volumes:
+      - ./data:/data/db
+    networks:
+      - default
+networks:
+  default:

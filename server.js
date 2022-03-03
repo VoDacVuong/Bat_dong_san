@@ -3,8 +3,8 @@ const path = require('path')
 var bodyParser = require('body-parser')
 const app = express()
 var user = require("./router/user.js")
-// const port = process.env.PORT
-const port = 8000
+const port = process.env.PORT || 8000
+
 //Bổ xung đường dẫn tĩnh
 app.use('/public', express.static(path.join(__dirname, '/public')))
 
