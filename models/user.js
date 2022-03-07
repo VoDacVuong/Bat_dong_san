@@ -1,11 +1,14 @@
 const mongoose = require('mongoose');
 mongoURL = process.env.MONGO_URL || 'mongodb://localhost/BDS'
 mongoose.connect(mongoURL);
-
+console.log("Da ket noi token")
 const Schema = mongoose.Schema;
 
 const UserSchema = new Schema({
-    username: String,
+    username: {
+        type: String,
+        unique: true
+    },
     password: String,
     fullname: String,
     role: {

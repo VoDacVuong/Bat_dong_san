@@ -1,20 +1,29 @@
 const express = require('express')
 const path = require('path')
-var bodyParser = require('body-parser')
-const app = express()
-var user = require("./router/user.js")
 const port = process.env.PORT || 8000
+const app = express()
+
+var bodyParser = require('body-parser')
+var user = require("./router/user.js")
+var news = require("./router/news.js")
+// var multer = require('multer');
+// var upload = multer();
 
 //Bổ xung đường dẫn tĩnh
-app.use('/public', express.static(path.join(__dirname, '/public')))
-
+// app.use('/public', express.static(path.join(__dirname, '/public')))
+app.use('/public/uploads', express.static(path.join(__dirname, './public/uploads')))
 // parse application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: false }))
-
 // parse application/json
 app.use(bodyParser.json())
 
+// app.use(upload.array());
+// app.use(express.static('public'));
+
+
+
 app.use("/api/v1/user/", user)
+app.use("/api/v1/news", news)
 
 // app.get('/', (req, res) => {
 //     var duongdanfile = path.join(__dirname, 'home.html')

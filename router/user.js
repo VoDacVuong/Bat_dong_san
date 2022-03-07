@@ -8,9 +8,9 @@ var router = express.Router()
 const PAGE_SIZE = 2
 
 
-router.get("/:id", (req, res) => {
-    res.json(`Day là medthod GET ${req.params.id}`)
-})
+// router.get("/:id", (req, res) => {
+//     res.json(`Day là medthod GET ${req.params.id}`)
+// })
 
 router.get("/", (req, res, next) => {
     var page = req.body.page
@@ -172,7 +172,7 @@ router.post('/login', (req, res, next) => {
 })
 
 // get profile
-router.post('/profile', (req, res, next) => {
+router.get('/profile', (req, res, next) => {
     token = req.body.token
     TokenModel.findOne({
         token: token,
