@@ -1,5 +1,5 @@
 const express = require('express')
-const PAGE_SIZE = 10
+const PAGE_SIZE = 2
 const upload = require('./upload');
 const Resize = require('./resize');
 const { json } = require('body-parser');
@@ -14,68 +14,117 @@ var TokenModel = require("../models/token.js")
 var NewsModel = require("../models/news.js")
 var jwt = require('jsonwebtoken');
 const { none } = require('./upload');
+const { Stats } = require('fs');
+const { vary } = require('express/lib/response');
 var router = express.Router()
+
+router.get('/city', (req, res, next) => {
+    NewsModel.find({}, (err, news) => {
+        arr_city = []
+        for (item of news) {
+            arr_city.push(item.address.city)
+        }
+        return res.json({
+            'message': 'Success',
+            'data': arr_city
+        })
+    })
+})
 
 // get all tin
 router.post('/', (req, res, next) => {
-    var title = req.body.title
-    var type = req.body.type
-    // var username = req.body.username
-    var status = req.body.status || true
-    var city = req.body.city
-    var district = req.body.district
-    var street = req.body.street
-    var price = parseInt(req.body.price)
-    var page = req.body.page
-    if (page) {
-        page = parseInt(page)
-        if (page < 1) {
-            page = 1
-        }
-        var skip = (page - 1) * PAGE_SIZE
-        NewsModel.find({
-        })
-            .skip(skip)
-            .limit(PAGE_SIZE)
-            .then(data => {
-                NewsModel.countDocuments({}).then((total) => {
-                    var tongSoPage = Math.ceil(total / PAGE_SIZE)
-                    return res.json({
-                        'total': total,
-                        'total_page': tongSoPage,
-                        'message': 'Success',
-                        'data': data
-                    })
-                })
+    var page = parseInt(req.body.page) || 1
+    var page_size = parseInt(req.body.page_size) || PAGE_SIZE
+    var news_fields = [
+        'title',
+        'type',
+        'status',
+        'city',
+        'district',
+        'street',
+        'price',
+        'city',
+        'district',
+        'street'
+    ]
+    var order_by = req.body.order_by || 1
+    var dict = {}
+    for (var i of news_fields) {
+        if (req.body[i] != undefined) {
+            if (i === 'city' || i == 'district' || i == 'street') {
+                dict['address.' + i] = req.body[i]
+            }
+            else {
+                dict[i] = req.body[i]
+            }
 
-            })
-            .catch(err => {
-                return res.json({
-                    'message': 'Loi phan trang !',
-                    'data': []
-                })
-            })
+        }
     }
-    else {
-        NewsModel.find({})
-            .then(data => {
-                NewsModel.countDocuments({}).then((total) => {
-                    var tongSoPage = Math.ceil(total / PAGE_SIZE)
-                    return res.json({
-                        'total': total,
-                        'total_page': tongSoPage,
-                        'message': 'Success',
-                        'data': data
-                    })
-                })
+    var skip = (page - 1) * page_size
+    console.log(dict)
+    dict['order_by'] = 'l'
+    NewsModel.find(dict)
+        .sort({
+            price: order_by
+        })
+        .skip(skip)
+        .limit(page_size)
+        .then(news => {
+            var tongSoPage = Math.ceil(news.length / page_size)
+            return res.json({
+                'total': news.length,
+                'total_page': tongSoPage,
+                'message': 'Success',
+                'data': news
             })
-            .catch(err => {
-                return res.json({
-                    'message': 'Contact admin for support',
-                    'data': []
-                })
-            })
-    }
+        })
+    // if (page) {
+    //     page = parseInt(page)
+    //     if (page < 1) {
+    //         page = 1
+    //     }
+    //     var skip = (page - 1) * PAGE_SIZE
+    //     NewsModel.find({})
+    //         .skip(skip)
+    //         .limit(PAGE_SIZE)
+    //         .then(data => {
+    //             NewsModel.countDocuments({}).then((total) => {
+    //                 var tongSoPage = Math.ceil(total / PAGE_SIZE)
+    //                 return res.json({
+    //                     'total': total,
+    //                     'total_page': tongSoPage,
+    //                     'message': 'Success',
+    //                     'data': data
+    //                 })
+    //             })
+    //         })
+    //         .catch(err => {
+    //             return res.json({
+    //                 'message': 'Loi phan trang !',
+    //                 'data': []
+    //             })
+    //         })
+    // }
+    // else {
+    //     NewsModel.find({})
+    //         .then(data => {
+    //             NewsModel.countDocuments({}).then((total) => {
+    //                 var tongSoPage = Math.ceil(total / PAGE_SIZE)
+    //                 return res.json({
+    //                     'total': total,
+    //                     'total_page': tongSoPage,
+    //                     'message': 'Success',
+    //                     'data': data
+    //                 })
+    //             })
+    //         })
+    //         .catch(err => {
+    //             return res.json({
+    //                 'message': 'Contact admin for support',
+    //                 'data': []
+    //             })
+    //         })
+    // }
 })
 
 // upload ảnh
