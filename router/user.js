@@ -216,6 +216,10 @@ router.post('/login', (req, res, next) => {
                 })
             })
         }
+        return res.json({
+            'message': 'Tài khoản không tồn tại !',
+            'data': []
+        })
     })
 
     // UserModel.findOne({
