@@ -1,11 +1,14 @@
 const express = require('express')
+const bcrypt = require('bcrypt');
+const PAGE_SIZE = 2
+const { json } = require('body-parser');
+const app = express()
+const upload = require('./upload');
+
+var router = express.Router()
 var UserModel = require("../models/user.js")
 var TokenModel = require("../models/token.js")
 var jwt = require('jsonwebtoken');
-const { json } = require('body-parser');
-const app = express()
-var router = express.Router()
-const PAGE_SIZE = 2
 
 
 // router.get("/:id", (req, res) => {
@@ -64,14 +67,19 @@ router.get("/", (req, res, next) => {
 })
 
 // Dang ky tai khoan
-router.post("/register", (req, res) => {
+router.post("/register", upload.single('avatar'), (req, res) => {
     var username = req.body.username
     var password = req.body.password
     var fullname = req.body.fullname || ''
     var gender = req.body.gender || ''
     var phone = req.body.phone || ''
     var role = req.body.role || 'CUSTOMER'
-
+    var avatar = ''
+    file = req.file
+    if (file) {
+        avatar = 'http://' + req.headers.host + '/' + file.destination + '/' + file.filename
+    }
+    console.log(file)
     if (!username || !password) {
         return res.json({
             'message': 'Vui long nhap day du thong tin username, password !',
@@ -96,7 +104,8 @@ router.post("/register", (req, res) => {
                     fullname: fullname,
                     gender: gender,
                     phone: phone,
-                    role: role
+                    role: role,
+                    avatar: avatar
                 })
                 var token = jwt.sign({ 'username': username }, 'secret')
                 // var dulieu = jwt.verify(token, 'secret')
@@ -118,33 +127,72 @@ router.post("/register", (req, res) => {
 })
 
 // update tai khoan
-router.post("/update", (req, res) => {
-    var id = req.body.id
-    var password = req.body.password
-    UserModel.findOneAndUpdate({
-        _id: id
-    },
-        {
-            password: password
+router.post("/update", upload.single('avatar'), (req, res) => {
+    fullname = req.body.fullname
+    gender = req.body.gender
+    phone = req.body.phone
+    token = req.body.token
+    TokenModel.findOne({
+        token: token,
+        status: true
+    }, (err, token) => {
+        if (!token) {
+            return res.json({
+                'message': "Vui Long dang nhap, hoac token da het han",
+                data: []
+            })
+        }
+        acc = jwt.verify(token.token, 'secret')
+        UserModel.findOne({
+            username: acc.username
+        }, (err, user) => {
+            if (!user) {
+                return res.json({
+                    'message': 'User không tồn tại !',
+                    'data': []
+                })
+            }
+            avatar = ''
+            file = req.file
+            if (file) {
+                avatar = 'http://' + req.headers.host + '/' + file.destination + '/' + file.filename
+            }
+            user.fullname = fullname || user.fullname
+            user.gender = gender || user.gender
+            user.phone = phone || user.phone
+            user.avatar = avatar || user.avatar
+            user.save()
+            return res.json({
+                'message': 'Success',
+                'data': {
+                    username: user.username,
+                    fullname: user.fullname,
+                    role: user.role,
+                    gender: user.gender,
+                    phone: user.phone,
+                    avatar: user.avatar
+                }
+            })
         })
-        .then(data => {
-            res.json("update thanh cong")
-        })
-        .catch(err => {
-            res.json("update that bai")
-        })
+    })
 })
 
 // Dang nhap
 router.post('/login', (req, res, next) => {
     var username = req.body.username
     var password = req.body.password
+
     UserModel.findOne({
-        username: username,
-        password: password
-    })
-        .then(data => {
-            if (data) {
+        username: username
+    }, (err, user) => {
+        if (user) {
+            bcrypt.compare(password, user.password, (err, isMatch) => {
+                if (!isMatch) {
+                    return res.json({
+                        'message': 'Vui lòng kiểm tra lại mật khẩu !',
+                        'data': []
+                    })
+                }
                 var token = jwt.sign({ 'username': username }, 'secret')
                 // var dulieu = jwt.verify(token, 'secret')
                 // console.log(dulieu)
@@ -158,16 +206,47 @@ router.post('/login', (req, res, next) => {
                     })
                 return res.json({
                     'token': token,
-                    'data': data
+                    'data': {
+                        username: user.username,
+                        fullname: user.fullname,
+                        role: user.role,
+                        gender: user.gender,
+                        phone: user.phone
+                    }
                 })
-            }
-            else {
-                return res.json("Tai khoan khong ton tai")
-            }
-        })
-        .catch(err => {
-            return res.json("Loi server")
-        })
+            })
+        }
+    })
+
+    // UserModel.findOne({
+    //     username: username,
+    //     password: password
+    // })
+    //     .then(data => {
+    //         if (data) {
+    //             var token = jwt.sign({ 'username': username }, 'secret')
+    //             // var dulieu = jwt.verify(token, 'secret')
+    //             // console.log(dulieu)
+    //             TokenModel.updateMany({ username: username }, { status: false })
+    //                 .then(data => {
+    //                     TokenModel.create({
+    //                         username: username,
+    //                         token: token,
+    //                         status: true
+    //                     })
+    //                 })
+    //             return res.json({
+    //                 'token': token,
+    //                 'data': data
+    //             })
+    //         }
+    //         else {
+    //             return res.json("Tai khoan khong ton tai")
+    //         }
+    //     })
+    //     .catch(err => {
+    //         return res.json("Loi server")
+    //     })
 
 })
 
@@ -177,16 +256,36 @@ router.get('/profile', (req, res, next) => {
     TokenModel.findOne({
         token: token,
         status: true
-    })
-        .then(data => {
-            if (data) {
-                account = jwt.verify(token, 'secret')
-                return res.json("Xin chao " + account.username)
+    }, (err, token) => {
+        if (!token) {
+            return res.json({
+                'message': "Vui Long dang nhap, hoac token da het han",
+                data: []
+            })
+        }
+        acc = jwt.verify(token.token, 'secret')
+        UserModel.findOne({
+            username: acc.username
+        }, (err, user) => {
+            if (!user) {
+                return res.json({
+                    'message': 'User không tồn tại !',
+                    'data': []
+                })
             }
-            else {
-                return res.json("Vui Long dang nhap, hoac token da het han")
-            }
+            return res.json({
+                'message': 'Success',
+                'data': {
+                    username: user.username,
+                    fullname: user.fullname,
+                    role: user.role,
+                    gender: user.gender,
+                    phone: user.phone,
+                    avatar: user.avatar
+                }
+            })
         })
+    })
 })
 
 module.exports = router

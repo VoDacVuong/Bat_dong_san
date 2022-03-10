@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const { number } = require('sharp/lib/is');
 mongoURL = process.env.MONGO_URL || 'mongodb://localhost/BDS'
 mongoose.connect(mongoURL);
-console.log("Da ket noi news")
+console.log("Da ket noi model news")
 
 const Schema = mongoose.Schema;
 
@@ -44,7 +44,8 @@ const NewsSchema = new Schema({
     },
     img_info: {
         type: Object
-    }
+    },
+    note: String
 }, {
     collection: 'news'
 });
