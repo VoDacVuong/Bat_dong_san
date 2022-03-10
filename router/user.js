@@ -79,7 +79,6 @@ router.post("/register", upload.single('avatar'), (req, res) => {
     if (file) {
         avatar = 'http://' + req.headers.host + '/' + file.destination + '/' + file.filename
     }
-    console.log(file)
     if (!username || !password) {
         return res.json({
             'message': 'Vui long nhap day du thong tin username, password !',
@@ -185,40 +184,40 @@ router.post('/login', (req, res, next) => {
     UserModel.findOne({
         username: username
     }, (err, user) => {
-        if (user) {
-            bcrypt.compare(password, user.password, (err, isMatch) => {
-                if (!isMatch) {
-                    return res.json({
-                        'message': 'Vui lòng kiểm tra lại mật khẩu !',
-                        'data': []
-                    })
-                }
-                var token = jwt.sign({ 'username': username }, 'secret')
-                // var dulieu = jwt.verify(token, 'secret')
-                // console.log(dulieu)
-                TokenModel.updateMany({ username: username }, { status: false })
-                    .then(data => {
-                        TokenModel.create({
-                            username: username,
-                            token: token,
-                            status: true
-                        })
-                    })
-                return res.json({
-                    'token': token,
-                    'data': {
-                        username: user.username,
-                        fullname: user.fullname,
-                        role: user.role,
-                        gender: user.gender,
-                        phone: user.phone
-                    }
-                })
+        if (!user) {
+            return res.json({
+                'message': 'Tài khoản không tồn tại !',
+                'data': []
             })
         }
-        return res.json({
-            'message': 'Tài khoản không tồn tại !',
-            'data': []
+        bcrypt.compare(password, user.password, (err, isMatch) => {
+            if (!isMatch) {
+                return res.json({
+                    'message': 'Vui lòng kiểm tra lại mật khẩu !',
+                    'data': []
+                })
+            }
+            var token = jwt.sign({ 'username': username }, 'secret')
+            // var dulieu = jwt.verify(token, 'secret')
+            // console.log(dulieu)
+            TokenModel.updateMany({ username: username }, { status: false })
+                .then(data => {
+                    TokenModel.create({
+                        username: username,
+                        token: token,
+                        status: true
+                    })
+                })
+            return res.json({
+                'token': token,
+                'data': {
+                    username: user.username,
+                    fullname: user.fullname,
+                    role: user.role,
+                    gender: user.gender,
+                    phone: user.phone
+                }
+            })
         })
     })
 
