@@ -8,6 +8,7 @@ const upload = require('./upload');
 var router = express.Router()
 var UserModel = require("../models/user.js")
 var TokenModel = require("../models/token.js")
+var NewsModel = require("../models/news.js")
 var jwt = require('jsonwebtoken');
 
 
@@ -215,7 +216,8 @@ router.post('/login', (req, res, next) => {
                     fullname: user.fullname,
                     role: user.role,
                     gender: user.gender,
-                    phone: user.phone
+                    phone: user.phone,
+                    avatar: user.avatar
                 }
             })
         })
@@ -286,6 +288,29 @@ router.get('/profile', (req, res, next) => {
                     phone: user.phone,
                     avatar: user.avatar
                 }
+            })
+        })
+    })
+})
+
+router.post('/news', (req, res, next) => {
+    token = req.body.token
+    TokenModel.findOne({
+        token: token
+    }, (err, token) => {
+        if (!token) {
+            return res.json({
+                'message': "Vui Long dang nhap, hoac token da het han",
+                data: []
+            })
+        }
+        acc = jwt.verify(token.token, 'secret')
+        NewsModel.find({
+            username: acc.username
+        }, (err, news) => {
+            return res.json({
+                'message': 'Success',
+                'data': news
             })
         })
     })
