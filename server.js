@@ -7,6 +7,7 @@ var bodyParser = require('body-parser')
 var user = require("./router/user.js")
 var news = require("./router/news.js")
 var address = require("./router/address.js")
+var comment = require("./router/comment.js")
 // var multer = require('multer');
 // var upload = multer();
 
@@ -24,8 +25,9 @@ app.use(bodyParser.json())
 
 
 app.use("/api/v1/user/", user)
-app.use("/api/v1/news", news)
-app.use("/api/v1/address", address)
+app.use("/api/v1/news/", news)
+app.use("/api/v1/address/", address)
+app.use("/api/v1/comments/", comment)
 
 // app.get('/', (req, res) => {
 //     var duongdanfile = path.join(__dirname, 'home.html')
