@@ -15,6 +15,13 @@ const NewsSchema = new Schema({
     price: Number,
     type: {
         type: String,
+        enum: [
+            'BIET_THU',
+            'NHA_VUON',
+            'NHA_PHO',
+            'CHUNG_CU',
+            'CAN_HO'
+        ],
         required: true
     },
     username: {
@@ -44,6 +51,18 @@ const NewsSchema = new Schema({
     },
     img_info: {
         type: Object
+    },
+    acreage: {
+        type: Number,
+        default: 0
+    },
+    bedroom_no: {
+        type: Number,
+        default: 0
+    },
+    bathroom_no: {
+        type: Number,
+        default: 0
     },
     note: String
 }, {

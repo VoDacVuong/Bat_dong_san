@@ -24,7 +24,12 @@ const UserSchema = new Schema({
         type: String,
         enum: ['Female', 'Male']
     },
-    phone: String,
+    phone: {
+        type: String
+    },
+    email: {
+        type: String
+    },
     activate: {
         type: Boolean,
         default: true

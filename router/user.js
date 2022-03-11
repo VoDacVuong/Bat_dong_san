@@ -98,12 +98,8 @@ router.post("/register", upload.single('avatar'), (req, res) => {
                 UserModel.create({
                     uid: uuid.v4(),
                     username: username,
-                    password: password,
-                    fullname: fullname,
-                    gender: gender,
-                    phone: phone,
-                    role: role,
-                    avatar: avatar
+                    password: password
+
                 }, (err, user) => {
                     if (err) {
                         return res.json({

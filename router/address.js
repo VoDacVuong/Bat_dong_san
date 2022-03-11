@@ -7,7 +7,19 @@ var AddressModel = require("../models/address.js")
 var jwt = require('jsonwebtoken');
 
 router.get('/', (req, res, next) => {
-    AddressModel.find({}, (err, address) => {
+    var address_fields = [
+        'city',
+        'district',
+        'street'
+    ]
+    var dict = {}
+    for (var i of address_fields) {
+        if (req.body[i] != undefined) {
+            dict[i] = req.body[i]
+        }
+    }
+
+    AddressModel.find(dict, (err, address) => {
         return res.json({
             'message': 'Success',
             'data': address
