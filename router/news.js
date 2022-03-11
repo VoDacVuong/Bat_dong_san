@@ -57,12 +57,11 @@ router.post('/', (req, res, next) => {
             else {
                 dict[i] = req.body[i]
             }
-
         }
     }
     var skip = (page - 1) * page_size
     console.log(dict)
-    dict['order_by'] = 'l'
+    dict['order_by'] = '1'
     NewsModel.find(dict)
         .sort({
             price: order_by
@@ -149,6 +148,9 @@ router.post('/create', upload.array('imgs', 10), (req, res, next) => {
     var district = req.body.district
     var street = req.body.street
     var price = req.body.price
+    var acreage = req.body.acreage
+    var bedroom_no = req.body.bedroom_no
+    var bathroom_no = req.body.bathroom_no
     // upload hinh anh
     const files = req.files
     console.log(files)
@@ -187,7 +189,10 @@ router.post('/create', upload.array('imgs', 10), (req, res, next) => {
                         street: street
                     },
                     // img_avatar: 'http://' + req.headers.host + '/' + file.destination + '/' + file.filename
-                    img_info: array_IMG
+                    img_info: array_IMG,
+                    acreage: acreage,
+                    bedroom_no: bedroom_no,
+                    bathroom_no: bathroom_no
                 })
                     .then(data => {
                         return res.json({
@@ -254,6 +259,10 @@ router.post('/update', upload.array('imgs', 10), (req, res, next) => {
     var district = req.body.district
     var street = req.body.street
     var price = req.body.price
+    var acreage = req.body.acreage
+    var bedroom_no = req.body.bedroom_no
+    var bathroom_no = req.body.bathroom_no
+
     const files = req.files
     var array_IMG = undefined
     if (files.length) {
@@ -290,7 +299,12 @@ router.post('/update', upload.array('imgs', 10), (req, res, next) => {
             news.address.district = district || news.address.district
             news.address.street = street || news.address.street
             news.img_info = array_IMG || news.img_info
+            news.acreage = acreage || news.acreage
+            news.bedroom_no = bedroom_no || news.bedroom_no
+            news.bathroom_no = bathroom_no || news.bathroom_no
+
             news.save()
+
             return res.json({
                 'message': 'Success',
                 'data': news
