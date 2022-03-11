@@ -7,6 +7,7 @@ var bodyParser = require('body-parser')
 var user = require("./router/user.js")
 var news = require("./router/news.js")
 var address = require("./router/address.js")
+var cors = require('cors')
 // var multer = require('multer');
 // var upload = multer();
 
@@ -17,7 +18,7 @@ app.use('/public/uploads', express.static(path.join(__dirname, './public/uploads
 app.use(bodyParser.urlencoded({ extended: false }))
 // parse application/json
 app.use(bodyParser.json())
-
+app.use(cors())
 // app.use(upload.array());
 // app.use(express.static('public'));
 
