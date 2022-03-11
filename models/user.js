@@ -5,6 +5,10 @@ mongoURL = process.env.MONGO_URL || 'mongodb://localhost/BDS'
 mongoose.connect(mongoURL);
 console.log("Da ket noi model user")
 const UserSchema = new Schema({
+    uid: {
+        type: String,
+        unique: true
+    },
     username: {
         type: String,
         unique: true
@@ -13,10 +17,18 @@ const UserSchema = new Schema({
     fullname: String,
     role: {
         type: String,
+        enum: ['CUSTOMER', 'ADMIN'],
         default: 'CUSTOMER'
     },
-    gender: String,
+    gender: {
+        type: String,
+        enum: ['Female', 'Male']
+    },
     phone: String,
+    activate: {
+        type: Boolean,
+        default: true
+    },
     avatar: {
         type: String,
         default: ''

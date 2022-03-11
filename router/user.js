@@ -1,20 +1,17 @@
 const express = require('express')
 const bcrypt = require('bcrypt');
-const PAGE_SIZE = 2
+const PAGE_SIZE = 10
 const { json } = require('body-parser');
 const app = express()
 const upload = require('./upload');
-
+const uuid = require('uuid');
+const common = require('./common.js')
 var router = express.Router()
 var UserModel = require("../models/user.js")
 var TokenModel = require("../models/token.js")
 var NewsModel = require("../models/news.js")
 var jwt = require('jsonwebtoken');
-
-
-// router.get("/:id", (req, res) => {
-//     res.json(`Day là medthod GET ${req.params.id}`)
-// })
+const { status } = require('express/lib/response');
 
 router.get("/", (req, res, next) => {
     var page = req.body.page
@@ -99,6 +96,7 @@ router.post("/register", upload.single('avatar'), (req, res) => {
             }
             else {
                 UserModel.create({
+                    uid: uuid.v4(),
                     username: username,
                     password: password,
                     fullname: fullname,
@@ -106,22 +104,27 @@ router.post("/register", upload.single('avatar'), (req, res) => {
                     phone: phone,
                     role: role,
                     avatar: avatar
-                })
-                var token = jwt.sign({ 'username': username }, 'secret')
-                // var dulieu = jwt.verify(token, 'secret')
-                // console.log(dulieu)
-                TokenModel.create({
-                    token: token,
-                    username: username,
-                    status: true
-                })
-                    .then(data => {
+                }, (err, user) => {
+                    if (err) {
                         return res.json({
-                            'token': token,
-                            'message': 'Tao thanh cong',
+                            'message': 'Thông tin nhập không chính xác !',
                             'data': []
                         })
+                    }
+                    var token = jwt.sign({ 'username': user.username }, 'secret')
+                    TokenModel.create({
+                        token: token,
+                        username: username,
+                        status: true
                     })
+                        .then(data => {
+                            return res.json({
+                                'token': token,
+                                'message': 'Tao thanh cong',
+                                'data': []
+                            })
+                        })
+                })
             }
         })
 })
@@ -165,6 +168,8 @@ router.post("/update", upload.single('avatar'), (req, res) => {
             return res.json({
                 'message': 'Success',
                 'data': {
+                    uid: user.uid,
+                    activate: user.activate,
                     username: user.username,
                     fullname: user.fullname,
                     role: user.role,
@@ -183,7 +188,8 @@ router.post('/login', (req, res, next) => {
     var password = req.body.password
 
     UserModel.findOne({
-        username: username
+        username: username,
+        activate: true
     }, (err, user) => {
         if (!user) {
             return res.json({
@@ -212,6 +218,8 @@ router.post('/login', (req, res, next) => {
             return res.json({
                 'token': token,
                 'data': {
+                    uid: user.uid,
+                    activate: user.activate,
                     username: user.username,
                     fullname: user.fullname,
                     role: user.role,
@@ -293,6 +301,7 @@ router.get('/profile', (req, res, next) => {
     })
 })
 
+// get news by user
 router.post('/news', (req, res, next) => {
     token = req.body.token
     TokenModel.findOne({
@@ -313,6 +322,46 @@ router.post('/news', (req, res, next) => {
                 'data': news
             })
         })
+    })
+})
+
+// deactivate user
+router.post('/deactivate', async (req, res) => {
+    uid = req.body.uid
+
+    token = await common.check_token(req)
+    if (!token) {
+        return res.status(404).json({
+            'message': 'Vui lòng đăng nhập hoặc token đã hết hạn !',
+            'data': []
+        })
+    }
+    user_req = await common.check_admin(token)
+    if (!user_req) {
+        return res.status(404).json({
+            'message': 'Permission denied',
+            'data': []
+        })
+    }
+
+    user_deactivate = await common.deactivate_user(uid)
+
+    if (user_deactivate) {
+        // deactivate user
+        user_deactivate.activate = false
+        user_deactivate.save()
+
+        // deactivate token
+        await common.get_token_by_username(user_deactivate)
+        return res.json({
+            'message': 'Success',
+            'data': []
+        })
+    }
+
+    return res.status(404).json({
+        'message': 'Contact admin for support',
+        'data': []
     })
 })
 
