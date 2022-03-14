@@ -3,7 +3,7 @@ const { number } = require('sharp/lib/is');
 mongoURL = process.env.MONGO_URL || 'mongodb://localhost/BDS'
 mongoose.connect(mongoURL);
 console.log("Da ket noi model comment")
-
+const timestamp = Date.now();
 const Schema = mongoose.Schema;
 
 const CommentSchema = new Schema({
@@ -14,13 +14,16 @@ const CommentSchema = new Schema({
     message: String,
     user: {
         type: String,
-        require: true,
         default: ''
+    },
+    created_at: {
+        type: String,
+        default: timestamp
     }
-    // created_at: new Time
 }, {
     collection: 'comment'
 });
 
-const CommentModel = mongoose.model('news', CommentSchema)
+const CommentModel = mongoose.model('comment', CommentSchema)
+
 module.exports = CommentModel
