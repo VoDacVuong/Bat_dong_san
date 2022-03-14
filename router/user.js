@@ -6,12 +6,17 @@ const app = express()
 const upload = require('./upload');
 const uuid = require('uuid');
 const common = require('./common.js')
+const { status } = require('express/lib/response');
+const nodemailer = require('nodemailer')
+
 var router = express.Router()
 var UserModel = require("../models/user.js")
 var TokenModel = require("../models/token.js")
 var NewsModel = require("../models/news.js")
 var jwt = require('jsonwebtoken');
-const { status } = require('express/lib/response');
+
+
+const smtpTransport = nodemailer.createTestA
 
 router.get("/", (req, res, next) => {
     var page = req.body.page
@@ -114,6 +119,7 @@ router.post("/register", upload.single('avatar'), (req, res) => {
                         status: true
                     })
                         .then(data => {
+
                             return res.json({
                                 'token': token,
                                 'message': 'Tao thanh cong',
@@ -377,5 +383,7 @@ router.post('/logout', async (req, res, next) => {
     })
 
 })
+
+
 
 module.exports = router
