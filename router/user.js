@@ -188,14 +188,14 @@ router.post('/login', (req, res, next) => {
         activate: true
     }, (err, user) => {
         if (!user) {
-            return res.status(404).json({
+            return res.status(400).json({
                 'message': 'Tài khoản không tồn tại !',
                 'data': []
             })
         }
         bcrypt.compare(password, user.password, (err, isMatch) => {
             if (!isMatch) {
-                return res.status(404).json({
+                return res.status(400).json({
                     'message': 'Vui lòng kiểm tra lại mật khẩu !',
                     'data': []
                 })
@@ -359,6 +359,23 @@ router.post('/deactivate', async (req, res) => {
         'message': 'Contact admin for support',
         'data': []
     })
+})
+
+router.post('/logout', async (req, res, next) => {
+    token = await common.check_token(req)
+    if (!token) {
+        return res.status(400).json({
+            'message': 'Contact admin for support',
+            'data': []
+        })
+    }
+    token.status = false
+    token.save()
+    return res.json({
+        'message': 'Success',
+        'data': []
+    })
+
 })
 
 module.exports = router
