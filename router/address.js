@@ -18,7 +18,7 @@ router.get('/', (req, res, next) => {
             dict[i] = req.body[i]
         }
     }
-
+    console.log(dict)
     AddressModel.find(dict, (err, address) => {
         return res.json({
             'message': 'Success',

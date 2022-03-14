@@ -16,23 +16,20 @@ const AddressSchema = new Schema({
     },
     city: {
         type: String,
-        unique: true,
         required: true
 
     },
     district: {
         type: String,
-        unique: true,
         required: true
     },
     street: {
         type: String,
-        unique: true,
         required: true
     }
 }, {
     collection: 'address'
 });
-
+AddressSchema.index({ 'city': 1, 'district': 1, 'street': 1 }, { unique: true })
 const AddressModel = mongoose.model('address', AddressSchema)
 module.exports = AddressModel

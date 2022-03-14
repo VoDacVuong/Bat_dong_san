@@ -188,14 +188,14 @@ router.post('/login', (req, res, next) => {
         activate: true
     }, (err, user) => {
         if (!user) {
-            return res.json({
+            return res.status(404).json({
                 'message': 'Tài khoản không tồn tại !',
                 'data': []
             })
         }
         bcrypt.compare(password, user.password, (err, isMatch) => {
             if (!isMatch) {
-                return res.json({
+                return res.status(404).json({
                     'message': 'Vui lòng kiểm tra lại mật khẩu !',
                     'data': []
                 })
