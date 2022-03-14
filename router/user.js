@@ -361,4 +361,21 @@ router.post('/deactivate', async (req, res) => {
     })
 })
 
+router.post('/logout', async (req, res, next) => {
+    token = await common.check_token(req)
+    if (!token) {
+        return res.status(400).json({
+            'message': 'Contact admin for support',
+            'data': []
+        })
+    }
+    token.status = false
+    token.save()
+    return res.json({
+        'message': 'Success',
+        'data': []
+    })
+
+})
+
 module.exports = router
