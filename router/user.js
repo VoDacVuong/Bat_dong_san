@@ -7,7 +7,15 @@ const upload = require('./upload');
 const uuid = require('uuid');
 const common = require('./common.js')
 const { status } = require('express/lib/response');
+const path = require('path')
 const nodemailer = require('nodemailer')
+const smtpTransport = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+        user: 'acc.deviuh@gmail.com',
+        pass: 'Vuong2905m'
+    }
+})
 
 var router = express.Router()
 var UserModel = require("../models/user.js")
@@ -15,8 +23,6 @@ var TokenModel = require("../models/token.js")
 var NewsModel = require("../models/news.js")
 var jwt = require('jsonwebtoken');
 
-
-const smtpTransport = nodemailer.createTestA
 
 router.get("/", (req, res, next) => {
     var page = req.body.page
@@ -70,21 +76,18 @@ router.get("/", (req, res, next) => {
 })
 
 // Dang ky tai khoan
-router.post("/register", upload.single('avatar'), (req, res) => {
+router.post("/register", upload.single('avatar'), async (req, res) => {
     var username = req.body.username
     var password = req.body.password
+    var email = req.body.email
     var fullname = req.body.fullname || ''
-    var gender = req.body.gender || ''
+    var gender = req.body.gender || 'other'
     var phone = req.body.phone || ''
-    var role = req.body.role || 'CUSTOMER'
-    var avatar = ''
-    file = req.file
-    if (file) {
-        avatar = 'http://' + req.headers.host + '/' + file.destination + '/' + file.filename
-    }
-    if (!username || !password) {
+    var avatar = common.get_file(req)
+
+    if (!username || !password || !email) {
         return res.json({
-            'message': 'Vui long nhap day du thong tin username, password !',
+            'message': 'Vui long nhap day du thong tin username, password và email !',
             'data': []
         })
     }
@@ -103,7 +106,9 @@ router.post("/register", upload.single('avatar'), (req, res) => {
                 UserModel.create({
                     uid: uuid.v4(),
                     username: username,
-                    password: password
+                    password: password,
+                    email: email,
+                    avatar: avatar
 
                 }, (err, user) => {
                     if (err) {
@@ -119,10 +124,27 @@ router.post("/register", upload.single('avatar'), (req, res) => {
                         status: true
                     })
                         .then(data => {
-
+                            var mailOptions = {
+                                from: 'acc.deviuh@gmail.com',
+                                to: email,
+                                subject: 'Active account',
+                                text: 'Xin chào ' + username + '. Để kích hoạt tài khoản của bạn vui lòng xác nhận: ' + 'http://' + req.headers.host + '/api/v1/user/active?username=' + username
+                            };
+                            smtpTransport.sendMail(mailOptions, (err, info) => {
+                                if (err) {
+                                    console.log(err)
+                                    return res.json({
+                                        'message': 'Contact admin for support',
+                                        'data': []
+                                    })
+                                }
+                                else {
+                                    console.log('Email sent: ' + info.response);
+                                }
+                            })
                             return res.json({
-                                'token': token,
-                                'message': 'Tao thanh cong',
+                                // 'token': token,
+                                'message': 'Success',
                                 'data': []
                             })
                         })
@@ -368,6 +390,7 @@ router.post('/deactivate', async (req, res) => {
     })
 })
 
+// logout
 router.post('/logout', async (req, res, next) => {
     token = await common.check_token(req)
     if (!token) {
@@ -385,6 +408,22 @@ router.post('/logout', async (req, res, next) => {
 
 })
 
-
+// active account
+// router.get('/:active', async (req, res) => {
+//     username = req.query.username
+//     user = await common.get_user_by_username(username)
+//     if (!user) {
+//         return res.json({
+//             // 'token': token,
+//             'message': 'Đăng ký không thành công !',
+//             'data': []
+//         })
+//     }
+//     user.activate = true
+//     user.save()
+//     console.log(path)
+//     var duongdanfile = path.join(__dirname, 'home.html')
+//     res.sendFile(duongdanfile)
+// })
 
 module.exports = router
