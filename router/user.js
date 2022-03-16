@@ -237,7 +237,7 @@ router.post('/login', (req, res, next) => {
         bcrypt.compare(password, user.password, (err, isMatch) => {
             if (!isMatch) {
                 return res.json({
-                    'error_code': 200,
+                    'error_code': 400,
                     'message': 'Vui lòng kiểm tra lại mật khẩu !',
                     'data': []
                 })

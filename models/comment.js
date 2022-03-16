@@ -17,8 +17,8 @@ const CommentSchema = new Schema({
         default: ''
     },
     created_at: {
-        type: String,
-        default: timestamp
+        type: Date,
+        default: Date.now
     }
 }, {
     collection: 'comment'

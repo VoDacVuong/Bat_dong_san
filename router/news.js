@@ -61,11 +61,9 @@ router.post('/', (req, res, next) => {
         }
     }
     var skip = (page - 1) * page_size
-    console.log(dict)
-    dict['order_by'] = '1'
     NewsModel.find(dict)
         .sort({
-            price: order_by
+            created_at: '-1'
         })
         .skip(skip)
         .limit(page_size)
