@@ -18,6 +18,7 @@ router.post('/', (req, res, next) => {
     console.log(dict)
     CommentModel.find(dict, (err, comments) => {
         return res.json({
+            'error_code': 200,
             'message': 'Success',
             'data': comments
         })
@@ -28,6 +29,7 @@ router.post('/create', async (req, res, next) => {
     token = await common.check_token(req)
     if (!token) {
         return res.json({
+            'error_code': 400,
             'message': 'Vui lòng đăng nhập hoặc token đã hết hạn !',
             'data': []
         })
@@ -41,12 +43,14 @@ router.post('/create', async (req, res, next) => {
             console.log(req.body.news_uid)
             console.log(req.body.message)
             return res.json({
+                'error_code': 400,
                 'message': 'Thông tin không hợp lệ !',
                 'data': []
             })
         }
         return res.json({
-            'message': 'Success!',
+            'error_code': 200,
+            'message': 'Success',
             'data': comment
         })
     })

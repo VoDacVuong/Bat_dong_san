@@ -21,6 +21,7 @@ router.get('/', (req, res, next) => {
     console.log(dict)
     AddressModel.find(dict, (err, address) => {
         return res.json({
+            'error_code': 200,
             'message': 'Success',
             'data': address
         })
@@ -40,11 +41,13 @@ router.post('/create', (req, res, next) => {
     }, (err, address) => {
         if (err) {
             return res.json({
+                'error_code': 400,
                 'message': 'Vui lòng nhập chính xác thông tin !',
                 'data': []
             })
         }
         return res.json({
+            'error_code': 200,
             'message': 'Success',
             'data': address
         })
@@ -62,6 +65,7 @@ router.post('/update', (req, res, next) => {
     }, (err, address) => {
         if (!address) {
             return res.json({
+                'error_code': 400,
                 'message': 'Không tìm thấy tin tương ứng',
                 'data': []
             })
@@ -71,6 +75,7 @@ router.post('/update', (req, res, next) => {
         address.street = street || address.street
         address.save()
         return res.json({
+            'error_code': 200,
             'message': 'Success',
             'data': address
         })

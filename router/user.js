@@ -39,6 +39,7 @@ router.get("/", (req, res, next) => {
                 UserModel.countDocuments({}).then((total) => {
                     var tongSoPage = Math.ceil(total / PAGE_SIZE)
                     return res.json({
+                        'error_code': 200,
                         'total': total,
                         'total_page': tongSoPage,
                         'message': 'Success',
@@ -48,6 +49,7 @@ router.get("/", (req, res, next) => {
             })
             .catch(err => {
                 return res.json({
+                    'error_code': 400,
                     'message': 'Loi phan trang !',
                     'data': []
                 })
@@ -59,6 +61,7 @@ router.get("/", (req, res, next) => {
                 UserModel.countDocuments({}).then((total) => {
                     var tongSoPage = Math.ceil(total / PAGE_SIZE)
                     return res.json({
+                        'error_code': 200,
                         'total': total,
                         'total_page': tongSoPage,
                         'message': 'Success',
@@ -68,6 +71,7 @@ router.get("/", (req, res, next) => {
             })
             .catch(err => {
                 return res.json({
+                    'error_code': 400,
                     'message': 'Contact admin for support',
                     'data': []
                 })
@@ -87,6 +91,7 @@ router.post("/register", upload.single('avatar'), async (req, res) => {
 
     if (!username || !password || !email) {
         return res.json({
+            'error_code': 400,
             'message': 'Vui long nhap day du thong tin username, password và email !',
             'data': []
         })
@@ -98,6 +103,7 @@ router.post("/register", upload.single('avatar'), async (req, res) => {
         .then(data => {
             if (data) {
                 return res.json({
+                    'error_code': 400,
                     'message': 'Username da ton tai!',
                     'data': []
                 })
@@ -113,6 +119,7 @@ router.post("/register", upload.single('avatar'), async (req, res) => {
                 }, (err, user) => {
                     if (err) {
                         return res.json({
+                            'error_code': 400,
                             'message': 'Thông tin nhập không chính xác !',
                             'data': []
                         })
@@ -134,6 +141,7 @@ router.post("/register", upload.single('avatar'), async (req, res) => {
                                 if (err) {
                                     console.log(err)
                                     return res.json({
+                                        'error_code': 400,
                                         'message': 'Contact admin for support',
                                         'data': []
                                     })
@@ -143,6 +151,7 @@ router.post("/register", upload.single('avatar'), async (req, res) => {
                                 }
                             })
                             return res.json({
+                                'error_code': 200,
                                 // 'token': token,
                                 'message': 'Success',
                                 'data': []
@@ -165,6 +174,7 @@ router.post("/update", upload.single('avatar'), (req, res) => {
     }, (err, token) => {
         if (!token) {
             return res.json({
+                'error_code': 400,
                 'message': "Vui Long dang nhap, hoac token da het han",
                 data: []
             })
@@ -175,6 +185,7 @@ router.post("/update", upload.single('avatar'), (req, res) => {
         }, (err, user) => {
             if (!user) {
                 return res.json({
+                    'error_code': 400,
                     'message': 'User không tồn tại !',
                     'data': []
                 })
@@ -190,6 +201,7 @@ router.post("/update", upload.single('avatar'), (req, res) => {
             user.avatar = avatar || user.avatar
             user.save()
             return res.json({
+                'error_code': 200,
                 'message': 'Success',
                 'data': {
                     uid: user.uid,
@@ -216,14 +228,16 @@ router.post('/login', (req, res, next) => {
         activate: true
     }, (err, user) => {
         if (!user) {
-            return res.status(400).json({
+            return res.json({
+                'error_code': 400,
                 'message': 'Tài khoản không tồn tại !',
                 'data': []
             })
         }
         bcrypt.compare(password, user.password, (err, isMatch) => {
             if (!isMatch) {
-                return res.status(400).json({
+                return res.json({
+                    'error_code': 200,
                     'message': 'Vui lòng kiểm tra lại mật khẩu !',
                     'data': []
                 })
@@ -240,6 +254,7 @@ router.post('/login', (req, res, next) => {
                     })
                 })
             return res.json({
+                'error_code': 200,
                 'message': 'Success',
                 'token': token,
                 'data': {
@@ -297,6 +312,7 @@ router.get('/profile', (req, res, next) => {
     }, (err, token) => {
         if (!token) {
             return res.json({
+                'error_code': 400,
                 'message': "Vui Long dang nhap, hoac token da het han",
                 data: []
             })
@@ -307,11 +323,13 @@ router.get('/profile', (req, res, next) => {
         }, (err, user) => {
             if (!user) {
                 return res.json({
+                    'error_code': 400,
                     'message': 'User không tồn tại !',
                     'data': []
                 })
             }
             return res.json({
+                'error_code': 200,
                 'message': 'Success',
                 'data': {
                     username: user.username,
@@ -334,6 +352,7 @@ router.post('/news', (req, res, next) => {
     }, (err, token) => {
         if (!token) {
             return res.json({
+                'error_code': 400,
                 'message': "Vui Long dang nhap, hoac token da het han",
                 data: []
             })
@@ -343,6 +362,7 @@ router.post('/news', (req, res, next) => {
             username: acc.username
         }, (err, news) => {
             return res.json({
+                'error_code': 200,
                 'message': 'Success',
                 'data': news
             })
@@ -356,14 +376,16 @@ router.post('/deactivate', async (req, res) => {
 
     token = await common.check_token(req)
     if (!token) {
-        return res.status(404).json({
+        return res.json({
+            'error_code': 400,
             'message': 'Vui lòng đăng nhập hoặc token đã hết hạn !',
             'data': []
         })
     }
     user_req = await common.check_admin(token)
     if (!user_req) {
-        return res.status(404).json({
+        return res.json({
+            'error_code': 400,
             'message': 'Permission denied',
             'data': []
         })
@@ -379,12 +401,14 @@ router.post('/deactivate', async (req, res) => {
         // deactivate token
         await common.get_token_by_username(user_deactivate)
         return res.json({
+            'error_code': 200,
             'message': 'Success',
             'data': []
         })
     }
 
-    return res.status(404).json({
+    return res.json({
+        'error_code': 400,
         'message': 'Contact admin for support',
         'data': []
     })
@@ -394,7 +418,8 @@ router.post('/deactivate', async (req, res) => {
 router.post('/logout', async (req, res, next) => {
     token = await common.check_token(req)
     if (!token) {
-        return res.status(400).json({
+        return res.json({
+            'error_code': 400,
             'message': 'Contact admin for support',
             'data': []
         })
@@ -402,6 +427,7 @@ router.post('/logout', async (req, res, next) => {
     token.status = false
     token.save()
     return res.json({
+        'error_code': 200,
         'message': 'Success',
         'data': []
     })

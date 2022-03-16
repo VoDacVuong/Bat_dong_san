@@ -25,6 +25,7 @@ router.get('/city', (req, res, next) => {
             arr_city.push(item.address.city)
         }
         return res.json({
+            'error_code': 200,
             'message': 'Success',
             'data': arr_city
         })
@@ -71,6 +72,7 @@ router.post('/', (req, res, next) => {
         .then(news => {
             var tongSoPage = Math.ceil(news.length / page_size)
             return res.json({
+                'error_code': 200,
                 'total': news.length,
                 'total_page': tongSoPage,
                 'message': 'Success',
@@ -156,6 +158,7 @@ router.post('/create', upload.array('imgs', 10), (req, res, next) => {
     console.log(files)
     if (!files.length) {
         return res.json({
+            'error_code': 400,
             'message': 'Vui long upload file !',
             'data': []
         })
@@ -196,12 +199,14 @@ router.post('/create', upload.array('imgs', 10), (req, res, next) => {
                 })
                     .then(data => {
                         return res.json({
+                            'error_code': 200,
                             'message': 'Success',
                             'data': data
                         })
                     })
                     .catch(err => {
                         return res.json({
+                            'error_code': 400,
                             'message': 'Thong tin nhap khong dung hoac sai, vui long kiem tra lai !',
                             'data': []
                         })
@@ -209,6 +214,7 @@ router.post('/create', upload.array('imgs', 10), (req, res, next) => {
             }
             else {
                 return res.json({
+                    'error_code': 400,
                     'message': 'Vui Long dang nhap, hoac token da het han !',
                     'data': []
                 })
@@ -227,12 +233,14 @@ router.get('/:detail', (req, res, next) => {
         .then(data => {
             if (data.length) {
                 return res.json({
+                    'error_code': 200,
                     'message': 'Success',
                     'data': data
                 })
             }
             else {
                 return res.json({
+                    'error_code': 400,
                     'message': 'Khong co du lieu tuong ung!',
                     'data': []
                 })
@@ -240,6 +248,7 @@ router.get('/:detail', (req, res, next) => {
         })
         .catch(err => {
             return res.json({
+                'error_code': 400,
                 'message': 'Contact admin for support',
                 'data': []
             })
@@ -278,6 +287,7 @@ router.post('/update', upload.array('imgs', 10), (req, res, next) => {
     }, (err, token) => {
         if (!token) {
             return res.json({
+                'error_code': 400,
                 'message': 'Vui Long dang nhap, hoac token da het han !',
                 'data': []
             })
@@ -287,6 +297,7 @@ router.post('/update', upload.array('imgs', 10), (req, res, next) => {
         }, (err, news) => {
             if (!news) {
                 return res.json({
+                    'error_code': 400,
                     'message': 'Không tìm thấy tin tương ứng',
                     'data': []
                 })
@@ -306,6 +317,7 @@ router.post('/update', upload.array('imgs', 10), (req, res, next) => {
             news.save()
 
             return res.json({
+                'error_code': 400,
                 'message': 'Success',
                 'data': news
             })
@@ -323,6 +335,7 @@ router.post('/delete', (req, res, next) => {
     }, (err, token) => {
         if (!token) {
             return res.json({
+                'error_code': 400,
                 'message': 'Vui lòng đăng nhập, hoặc token đã hết hạn !',
                 'data': []
             })
@@ -332,6 +345,7 @@ router.post('/delete', (req, res, next) => {
         }, (err, news) => {
             if (!news) {
                 return res.json({
+                    'error_code': 400,
                     'message': 'Không tìm thấy tin tương ứng',
                     'data': []
                 })
@@ -339,6 +353,7 @@ router.post('/delete', (req, res, next) => {
             news.status = false
             news.save()
             return res.json({
+                'error_code': 200,
                 'message': 'Success',
                 'data': news
             })
