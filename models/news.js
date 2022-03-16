@@ -64,7 +64,12 @@ const NewsSchema = new Schema({
         type: Number,
         default: 0
     },
-    note: String
+    note: String,
+    created_at: {
+        type: Date,
+        default: Date.now
+    }
+
 }, {
     collection: 'news'
 });
