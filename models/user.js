@@ -29,11 +29,13 @@ const UserSchema = new Schema({
         type: String
     },
     email: {
-        type: String
+        type: String,
+        unique: true,
+        require: true
     },
     activate: {
         type: Boolean,
-        default: true
+        default: false
     },
     avatar: {
         type: String,
