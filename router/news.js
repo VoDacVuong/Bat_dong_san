@@ -1,5 +1,5 @@
 const express = require('express')
-const PAGE_SIZE = 2
+const PAGE_SIZE = 10
 const upload = require('./upload');
 const Resize = require('./resize');
 const { json } = require('body-parser');
