@@ -62,7 +62,7 @@ router.post('/', async (req, res, next) => {
         }
     }
     var skip = (page - 1) * page_size
-    total_news = await common.count_entity(NewsModel)
+    total_news = await common.find_and_count_entity(NewsModel, dict)
     news = await common.get_all_entity(NewsModel, dict, skip, page_size)
     response = handle_response.success_ls(news, total_news, Math.ceil(total_news / page_size))
     return res.json(response)

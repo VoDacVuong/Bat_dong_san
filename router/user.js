@@ -39,7 +39,7 @@ router.get("/", async (req, res, next) => {
         }
     }
     var skip = (page - 1) * page_size
-    total_user = await common.count_entity(UserModel)
+    total_user = await common.find_and_count_entity(UserModel, dict)
     users = await common.get_all_entity(UserModel, dict, skip, page_size)
     response = handle_response.success_ls(users, total_user, Math.ceil(total_user / page_size))
     return res.json(response)

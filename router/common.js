@@ -69,3 +69,7 @@ module.exports.get_all_entity = function (entity, dict, skip, page_size) {
 module.exports.count_entity = function (model) {
     return model.countDocuments({})
 }
+
+module.exports.find_and_count_entity = function (model, dict) {
+    return model.countDocuments(dict)
+}
