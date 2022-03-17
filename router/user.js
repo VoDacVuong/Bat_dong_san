@@ -6,7 +6,7 @@ const app = express()
 const upload = require('./upload');
 const uuid = require('uuid');
 const common = require('./common.js')
-const { status } = require('express/lib/response');
+const { status, type } = require('express/lib/response');
 const path = require('path')
 const nodemailer = require('nodemailer')
 const smtpTransport = nodemailer.createTransport({
@@ -22,61 +22,79 @@ var UserModel = require("../models/user.js")
 var TokenModel = require("../models/token.js")
 var NewsModel = require("../models/news.js")
 var jwt = require('jsonwebtoken');
+const handle_response = require('../common/handle_response');
 
 
-router.get("/", (req, res, next) => {
-    var page = req.body.page
-    if (page) {
-        page = parseInt(page)
-        if (page < 1) {
-            page = 1
+router.get("/", async (req, res, next) => {
+    var page = parseInt(req.body.page) || 1
+    var page_size = parseInt(req.body.page_size) || PAGE_SIZE
+
+    var user_fields = [
+        'activate'
+    ]
+    var dict = {}
+    for (var i of user_fields) {
+        if (req.body[i] != undefined) {
+            dict[i] = req.body[i]
         }
-        var skip = (page - 1) * PAGE_SIZE
-        UserModel.find({})
-            .skip(skip)
-            .limit(PAGE_SIZE)
-            .then(data => {
-                UserModel.countDocuments({}).then((total) => {
-                    var tongSoPage = Math.ceil(total / PAGE_SIZE)
-                    return res.json({
-                        'error_code': 200,
-                        'total': total,
-                        'total_page': tongSoPage,
-                        'message': 'Success',
-                        'data': data
-                    })
-                })
-            })
-            .catch(err => {
-                return res.json({
-                    'error_code': 400,
-                    'message': 'Loi phan trang !',
-                    'data': []
-                })
-            })
     }
-    else {
-        UserModel.find({})
-            .then(data => {
-                UserModel.countDocuments({}).then((total) => {
-                    var tongSoPage = Math.ceil(total / PAGE_SIZE)
-                    return res.json({
-                        'error_code': 200,
-                        'total': total,
-                        'total_page': tongSoPage,
-                        'message': 'Success',
-                        'data': data
-                    })
-                })
-            })
-            .catch(err => {
-                return res.json({
-                    'error_code': 400,
-                    'message': 'Contact admin for support',
-                    'data': []
-                })
-            })
-    }
+    var skip = (page - 1) * page_size
+    total_user = await common.find_and_count_entity(UserModel, dict)
+    users = await common.get_all_entity(UserModel, dict, skip, page_size)
+    response = handle_response.success_ls(users, total_user, Math.ceil(total_user / page_size))
+    return res.json(response)
+    // var page = req.body.page
+    // if (page) {
+    //     page = parseInt(page)
+    //     if (page < 1) {
+    //         page = 1
+    //     }
+    //     var skip = (page - 1) * PAGE_SIZE
+    //     UserModel.find({})
+    //         .skip(skip)
+    //         .limit(PAGE_SIZE)
+    //         .then(data => {
+    //             UserModel.countDocuments({}).then((total) => {
+    //                 var tongSoPage = Math.ceil(total / PAGE_SIZE)
+    //                 return res.json({
+    //                     'error_code': 200,
+    //                     'total': total,
+    //                     'total_page': tongSoPage,
+    //                     'message': 'Success',
+    //                     'data': data
+    //                 })
+    //             })
+    //         })
+    //         .catch(err => {
+    //             return res.json({
+    //                 'error_code': 400,
+    //                 'message': 'Loi phan trang !',
+    //                 'data': []
+    //             })
+    //         })
+    // }
+    // else {
+    //     UserModel.find({})
+    //         .then(data => {
+    //             UserModel.countDocuments({}).then((total) => {
+    //                 var tongSoPage = Math.ceil(total / PAGE_SIZE)
+    //                 return res.json({
+    //                     'error_code': 200,
+    //                     'total': total,
+    //                     'total_page': tongSoPage,
+    //                     'message': 'Success',
+    //                     'data': data
+    //                 })
+    //             })
+    //         })
+    //         .catch(err => {
+    //             return res.json({
+    //                 'error_code': 400,
+    //                 'message': 'Contact admin for support',
+    //                 'data': []
+    //             })
+    //         })
+    // }
 })
 
 // Dang ky tai khoan

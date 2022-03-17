@@ -40,6 +40,10 @@ const UserSchema = new Schema({
     avatar: {
         type: String,
         default: ''
+    },
+    created_at: {
+        type: Date,
+        default: Date.now
     }
 }, {
     collection: 'user'
