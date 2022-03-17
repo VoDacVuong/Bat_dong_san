@@ -6,6 +6,8 @@ const { json } = require('body-parser');
 const app = express()
 const path = require('path');
 const uuid = require('uuid');
+const common = require('./common.js')
+const handle_response = require('../common/handle_response');
 
 var FormData = require('form-data');
 var data = new FormData();
@@ -33,7 +35,7 @@ router.get('/city', (req, res, next) => {
 })
 
 // get all tin
-router.post('/', (req, res, next) => {
+router.post('/', async (req, res, next) => {
     var page = parseInt(req.body.page) || 1
     var page_size = parseInt(req.body.page_size) || PAGE_SIZE
     var news_fields = [
@@ -48,7 +50,6 @@ router.post('/', (req, res, next) => {
         'district',
         'street'
     ]
-    var order_by = req.body.order_by || 1
     var dict = {}
     for (var i of news_fields) {
         if (req.body[i] != undefined) {
@@ -61,22 +62,26 @@ router.post('/', (req, res, next) => {
         }
     }
     var skip = (page - 1) * page_size
-    NewsModel.find(dict)
-        .sort({
-            created_at: '-1'
-        })
-        .skip(skip)
-        .limit(page_size)
-        .then(news => {
-            var tongSoPage = Math.ceil(news.length / page_size)
-            return res.json({
-                'error_code': 200,
-                'total': news.length,
-                'total_page': tongSoPage,
-                'message': 'Success',
-                'data': news
-            })
-        })
+    total_news = await common.count_entity(NewsModel)
+    news = await common.get_all_entity(NewsModel, dict, skip, page_size)
+    response = handle_response.success_ls(news, total_news, Math.ceil(total_news / page_size))
+    return res.json(response)
+    // NewsModel.find(dict)
+    //     .sort({
+    //         created_at: '-1'
+    //     })
+    //     .skip(skip)
+    //     .limit(page_size)
+    //     .then(news => {
+    //         var tongSoPage = Math.ceil(news.length / page_size)
+    //         return res.json({
+    //             'error_code': 200,
+    //             'total': news.length,
+    //             'total_page': tongSoPage,
+    //             'message': 'Success',
+    //             'data': news
+    //         })
+    //     })
     // if (page) {
     //     page = parseInt(page)
     //     if (page < 1) {

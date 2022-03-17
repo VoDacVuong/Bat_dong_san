@@ -10,6 +10,7 @@ const smtpTransport = nodemailer.createTransport({
 var UserModel = require("../models/user.js")
 var TokenModel = require("../models/token.js")
 var NewsModel = require("../models/news.js")
+const { json } = require('express/lib/response')
 
 
 module.exports.check_token = async function (req) {
@@ -59,4 +60,12 @@ module.exports.mail_options = function (req) {
 
 module.exports.send_mail = async function () {
     await smtpTransport.send_mail(this.mail_options)
+}
+
+module.exports.get_all_entity = function (entity, dict, skip, page_size) {
+    return entity.find(dict).skip(skip).limit(page_size).sort({ created_at: -1 })
+}
+
+module.exports.count_entity = function (model) {
+    return model.countDocuments({})
 }
