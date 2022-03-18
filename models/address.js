@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const { number, bool } = require('sharp/lib/is');
 mongoURL = process.env.MONGO_URL || 'mongodb://localhost/BDS'
 mongoose.connect(mongoURL);
-console.log("Da ket noi address")
+console.log("Connected Address")
 const Schema = mongoose.Schema;
 
 const AddressSchema = new Schema({

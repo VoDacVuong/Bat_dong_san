@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const { number } = require('sharp/lib/is');
 mongoURL = process.env.MONGO_URL || 'mongodb://localhost/BDS'
 mongoose.connect(mongoURL);
-console.log("Da ket noi model news")
+console.log("Connected News")
 
 const Schema = mongoose.Schema;
 
