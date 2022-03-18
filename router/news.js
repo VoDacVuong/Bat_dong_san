@@ -226,36 +226,45 @@ router.post('/create', upload.array('imgs', 10), (req, res, next) => {
 })
 
 // get detail
-router.get('/:detail', (req, res, next) => {
+router.get('/:detail', async (req, res, next) => {
     uid = req.query.uid
-    console.log(req.query)
-    console.log(req.params)
-    NewsModel.find({
-        uid: uid
-    })
-        .then(data => {
-            if (data.length) {
-                return res.json({
-                    'error_code': 200,
-                    'message': 'Success',
-                    'data': data
-                })
-            }
-            else {
-                return res.json({
-                    'error_code': 400,
-                    'message': 'Khong co du lieu tuong ung!',
-                    'data': []
-                })
-            }
-        })
-        .catch(err => {
-            return res.json({
-                'error_code': 400,
-                'message': 'Contact admin for support',
-                'data': []
-            })
-        })
+
+    news = await common.get_news_by_uid(uid)
+    if (!news) {
+        response_data = handle_response.error(message = 'News not found !')
+        return res.json(response_data)
+    }
+    owner = await common.get_user_by_username(news.username, { email: 1, phone: 1, avatar: 1, _id: 0 })
+    news['owner'] = owner
+    response_data = handle_response.success(news)
+    return res.json(response_data)
+
+    // NewsModel.find({
+    //     uid: uid
+    // })
+    //     .then(data => {
+    //         if (data.length) {
+    //             return res.json({
+    //                 'error_code': 200,
+    //                 'message': 'Success',
+    //                 'data': data
+    //             })
+    //         }
+    //         else {
+    //             return res.json({
+    //                 'error_code': 400,
+    //                 'message': 'Khong co du lieu tuong ung!',
+    //                 'data': []
+    //             })
+    //         }
+    //     })
+    //     .catch(err => {
+    //         return res.json({
+    //             'error_code': 400,
+    //             'message': 'Contact admin for support',
+    //             'data': []
+    //         })
+    //     })
 })
 
 // update news

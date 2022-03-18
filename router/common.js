@@ -39,8 +39,8 @@ module.exports.get_news_by_uid = async function (uid) {
     return await NewsModel.findOne({ 'uid': uid });
 }
 
-module.exports.get_user_by_username = async function (username) {
-    return await UserModel.findOne({ username: username });
+module.exports.get_user_by_username = async function (username, projection = {}) {
+    return await UserModel.findOne({ username: username }, projection);
 }
 
 module.exports.get_user_by_uid = function (uid) {
@@ -80,6 +80,10 @@ module.exports.find_and_count_entity = function (model, dict) {
     return model.countDocuments(dict)
 }
 
-module.exports.get_news_by_username = function (username) {
-    return NewsModel.find({ username: username })
+module.exports.get_news_by_username = function (username, projection = {}) {
+    return NewsModel.find({ username: username }, projection)
+}
+
+module.exports.get_news_by_uid = function (uid) {
+    return NewsModel.findOne({ uid: uid })
 }

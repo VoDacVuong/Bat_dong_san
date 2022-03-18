@@ -20,7 +20,7 @@ module.exports = {
         }
     },
 
-    false: function (message) {
+    error: function (message) {
         return {
             'error_code': 400,
             'message': message,

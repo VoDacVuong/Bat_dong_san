@@ -36,7 +36,7 @@ app.get('/api/v1/user/:active', async (req, res) => {
     username = req.query.username
     user = await common.get_user_by_username(username)
     if (!user) {
-        response_data = handle_response.false(message = 'User not found !')
+        response_data = handle_response.error(message = 'User not found !')
         return res.json(response_data)
     }
     user.activate = true

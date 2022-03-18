@@ -374,7 +374,7 @@ router.post('/news', async (req, res, next) => {
     token = await common.check_token(req)
     console.log(token)
     if (!token) {
-        response = handle_response.false(message = 'Vui lòng đăng nhập, hoặc token đã hết hạn !')
+        response = handle_response.error(message = 'Vui lòng đăng nhập, hoặc token đã hết hạn !')
         return res.json(response)
     }
 
@@ -420,13 +420,13 @@ router.post('/deactivate', async (req, res) => {
     uid = req.body.uid
 
     if (!await common.check_admin(token)) {
-        response_data = handle_response.false('Permission denied')
+        response_data = handle_response.error('Permission denied')
         return res.json(response_data)
     }
 
     user = await common.get_user_by_uid(uid)
     if (!user) {
-        response_data = handle_response.false('User không tồn tại !')
+        response_data = handle_response.error('User không tồn tại !')
         return res.json(response_data)
     }
 
@@ -478,7 +478,7 @@ router.post('/deactivate', async (req, res) => {
 router.post('/logout', async (req, res, next) => {
     token = await common.check_token(req)
     if (!token) {
-        response_data = handle_response.false(message = 'Vui lòng đăng nhập !')
+        response_data = handle_response.error(message = 'Vui lòng đăng nhập !')
         return res.json(response_data)
     }
     common.deactivate_token(token)
