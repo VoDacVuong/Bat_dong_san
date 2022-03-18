@@ -68,8 +68,8 @@ const NewsSchema = new Schema({
     created_at: {
         type: Date,
         default: Date.now
-    }
-
+    },
+    owner: Object
 }, {
     collection: 'news'
 });
