@@ -25,7 +25,7 @@ var jwt = require('jsonwebtoken');
 const handle_response = require('../common/handle_response');
 
 
-router.get("/", async (req, res, next) => {
+router.post("/", async (req, res, next) => {
     var page = parseInt(req.body.page) || 1
     var page_size = parseInt(req.body.page_size) || PAGE_SIZE
 
@@ -40,7 +40,7 @@ router.get("/", async (req, res, next) => {
     }
     var skip = (page - 1) * page_size
     total_user = await common.find_and_count_entity(UserModel, dict)
-    users = await common.get_all_entity(UserModel, dict, skip, page_size)
+    users = await common.get_all_entity(UserModel, dict, skip, page_size, projection = { password: 0 })
     response = handle_response.success_ls(users, total_user, Math.ceil(total_user / page_size))
     return res.json(response)
     // var page = req.body.page
@@ -322,134 +322,168 @@ router.post('/login', (req, res, next) => {
 })
 
 // get profile
-router.get('/profile', (req, res, next) => {
-    token = req.body.token
-    TokenModel.findOne({
-        token: token,
-        status: true
-    }, (err, token) => {
-        if (!token) {
-            return res.json({
-                'error_code': 400,
-                'message': "Vui Long dang nhap, hoac token da het han",
-                data: []
-            })
-        }
-        acc = jwt.verify(token.token, 'secret')
-        UserModel.findOne({
-            username: acc.username
-        }, (err, user) => {
-            if (!user) {
-                return res.json({
-                    'error_code': 400,
-                    'message': 'User không tồn tại !',
-                    'data': []
-                })
-            }
-            return res.json({
-                'error_code': 200,
-                'message': 'Success',
-                'data': {
-                    username: user.username,
-                    fullname: user.fullname,
-                    role: user.role,
-                    gender: user.gender,
-                    phone: user.phone,
-                    avatar: user.avatar
-                }
-            })
-        })
-    })
+router.get('/profile', async (req, res, next) => {
+    uid = req.query.uid
+    user = await common.get_user_by_uid(uid)
+    response_data = handle_response.success(user)
+    return res.json(response_data)
+    // token = req.body.token
+    // TokenModel.findOne({
+    //     token: token,
+    //     status: true
+    // }, (err, token) => {
+    //     if (!token) {
+    //         return res.json({
+    //             'error_code': 400,
+    //             'message': "Vui Long dang nhap, hoac token da het han",
+    //             data: []
+    //         })
+    //     }
+    //     acc = jwt.verify(token.token, 'secret')
+    //     UserModel.findOne({
+    //         username: acc.username
+    //     }, (err, user) => {
+    //         if (!user) {
+    //             return res.json({
+    //                 'error_code': 400,
+    //                 'message': 'User không tồn tại !',
+    //                 'data': []
+    //             })
+    //         }
+    //         return res.json({
+    //             'error_code': 200,
+    //             'message': 'Success',
+    //             'data': {
+    //                 username: user.username,
+    //                 fullname: user.fullname,
+    //                 role: user.role,
+    //                 gender: user.gender,
+    //                 phone: user.phone,
+    //                 avatar: user.avatar
+    //             }
+    //         })
+    //     })
+    // })
 })
 
 // get news by user
-router.post('/news', (req, res, next) => {
-    token = req.body.token
-    TokenModel.findOne({
-        token: token
-    }, (err, token) => {
-        if (!token) {
-            return res.json({
-                'error_code': 400,
-                'message': "Vui Long dang nhap, hoac token da het han",
-                data: []
-            })
-        }
-        acc = jwt.verify(token.token, 'secret')
-        NewsModel.find({
-            username: acc.username
-        }, (err, news) => {
-            return res.json({
-                'error_code': 200,
-                'message': 'Success',
-                'data': news
-            })
-        })
-    })
+router.post('/news', async (req, res, next) => {
+    var page = parseInt(req.body.page) || 1
+    var page_size = parseInt(req.body.page_size) || PAGE_SIZE
+
+    token = await common.check_token(req)
+    console.log(token)
+    if (!token) {
+        response = handle_response.false(message = 'Vui lòng đăng nhập, hoặc token đã hết hạn !')
+        return res.json(response)
+    }
+
+    acc = jwt.verify(token.token, 'secret')
+    dict = {
+        username: acc.username
+    }
+
+    var skip = (page - 1) * page_size
+    total_news = await common.find_and_count_entity(NewsModel, dict)
+    news = await common.get_all_entity(NewsModel, dict, skip, page_size)
+    response = handle_response.success_ls(news, total_news, Math.ceil(total_news / page_size))
+
+    return res.json(response)
+
+    // token = req.body.token
+    // TokenModel.findOne({
+    //     token: token
+    // }, (err, token) => {
+    //     if (!token) {
+    //         return res.json({
+    //             'error_code': 400,
+    //             'message': "Vui Long dang nhap, hoac token da het han",
+    //             data: []
+    //         })
+    //     }
+    //     acc = jwt.verify(token.token, 'secret')
+    //     NewsModel.find({
+    //         username: acc.username
+    //     }, (err, news) => {
+    //         return res.json({
+    //             'error_code': 200,
+    //             'message': 'Success',
+    //             'data': news
+    //         })
+    //     })
+    // })
 })
 
 // deactivate user
 router.post('/deactivate', async (req, res) => {
+    token = req.body.token
     uid = req.body.uid
 
-    token = await common.check_token(req)
-    if (!token) {
-        return res.json({
-            'error_code': 400,
-            'message': 'Vui lòng đăng nhập hoặc token đã hết hạn !',
-            'data': []
-        })
-    }
-    user_req = await common.check_admin(token)
-    if (!user_req) {
-        return res.json({
-            'error_code': 400,
-            'message': 'Permission denied',
-            'data': []
-        })
+    if (!await common.check_admin(token)) {
+        response_data = handle_response.false('Permission denied')
+        return res.json(response_data)
     }
 
-    user_deactivate = await common.deactivate_user(uid)
-
-    if (user_deactivate) {
-        // deactivate user
-        user_deactivate.activate = false
-        user_deactivate.save()
-
-        // deactivate token
-        await common.get_token_by_username(user_deactivate)
-        return res.json({
-            'error_code': 200,
-            'message': 'Success',
-            'data': []
-        })
+    user = await common.get_user_by_uid(uid)
+    if (!user) {
+        response_data = handle_response.false('User không tồn tại !')
+        return res.json(response_data)
     }
 
-    return res.json({
-        'error_code': 400,
-        'message': 'Contact admin for support',
-        'data': []
-    })
+    await common.deactivate_user(user)
+    response_data = handle_response.success([])
+    return res.json(response_data)
+
+    // token = await common.check_token(req)
+    // if (!token) {
+    //     return res.json({
+    //         'error_code': 400,
+    //         'message': 'Vui lòng đăng nhập hoặc token đã hết hạn !',
+    //         'data': []
+    //     })
+    // }
+    // user_req = await common.check_admin(token)
+    // if (!user_req) {
+    //     return res.json({
+    //         'error_code': 400,
+    //         'message': 'Permission denied',
+    //         'data': []
+    //     })
+    // }
+
+    // user_deactivate = await common.deactivate_user(uid)
+
+    // if (user_deactivate) {
+    //     // deactivate user
+    //     user_deactivate.activate = false
+    //     user_deactivate.save()
+
+    //     // deactivate token
+    //     await common.get_token_by_username(user_deactivate)
+    //     return res.json({
+    //         'error_code': 200,
+    //         'message': 'Success',
+    //         'data': []
+    //     })
+    // }
+
+    // return res.json({
+    //     'error_code': 400,
+    //     'message': 'Contact admin for support',
+    //     'data': []
+    // })
 })
 
 // logout
 router.post('/logout', async (req, res, next) => {
     token = await common.check_token(req)
     if (!token) {
-        return res.json({
-            'error_code': 400,
-            'message': 'Contact admin for support',
-            'data': []
-        })
+        response_data = handle_response.false(message = 'Vui lòng đăng nhập !')
+        return res.json(response_data)
     }
-    token.status = false
-    token.save()
-    return res.json({
-        'error_code': 200,
-        'message': 'Success',
-        'data': []
-    })
-
+    common.deactivate_token(token)
+    response_data = handle_response.success([])
+    return res.json(response_data)
 })
 
 // active account

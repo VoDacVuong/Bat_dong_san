@@ -18,19 +18,21 @@ module.exports.check_token = async function (req) {
 }
 
 module.exports.check_admin = async function (token) {
-    return await UserModel.findOne({ 'username': token.username, 'activate': true, 'role': 'ADMIN' });
+    token_qs = await TokenModel.findOne({ 'token': token, 'status': true }) || ''
+    return UserModel.findOne({ 'username': token_qs.username, 'activate': true, 'role': 'ADMIN' });
 }
 
 module.exports.deactivate_user = async function (uid) {
     return await UserModel.findOne({ 'uid': uid });
 }
 
-module.exports.deactivate_token = async function (user_deactivate) {
-    return await TokenModel.find({ 'username': user_deactivate.username });
+module.exports.deactivate_token = async function (token) {
+    await TokenModel.findOneAndUpdate({ 'username': token.username }, { 'status': false });
 }
 
-module.exports.get_token_by_username = async function (user_deactivate) {
-    await TokenModel.updateMany({ 'username': user_deactivate.username }, { 'status': false });
+module.exports.deactivate_user = async function (user) {
+    await TokenModel.updateMany({ 'username': user.username }, { 'status': false })
+    await UserModel.findOneAndUpdate({ 'username': user.username }, { 'activate': false });
 }
 
 module.exports.get_news_by_uid = async function (uid) {
@@ -39,6 +41,10 @@ module.exports.get_news_by_uid = async function (uid) {
 
 module.exports.get_user_by_username = async function (username) {
     return await UserModel.findOne({ username: username });
+}
+
+module.exports.get_user_by_uid = function (uid) {
+    return UserModel.findOne({ uid: uid });
 }
 
 module.exports.get_file = function (req) {
@@ -62,8 +68,8 @@ module.exports.send_mail = async function () {
     await smtpTransport.send_mail(this.mail_options)
 }
 
-module.exports.get_all_entity = function (entity, dict, skip, page_size) {
-    return entity.find(dict).skip(skip).limit(page_size).sort({ created_at: -1 })
+module.exports.get_all_entity = function (entity, dict, skip, page_size, projection = {}) {
+    return entity.find(dict, projection).skip(skip).limit(page_size).sort({ created_at: -1 })
 }
 
 module.exports.count_entity = function (model) {
@@ -72,4 +78,8 @@ module.exports.count_entity = function (model) {
 
 module.exports.find_and_count_entity = function (model, dict) {
     return model.countDocuments(dict)
+}
+
+module.exports.get_news_by_username = function (username) {
+    return NewsModel.find({ username: username })
 }

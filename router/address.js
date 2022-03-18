@@ -1,12 +1,15 @@
 const express = require('express')
 const uuid = require('uuid');
-const PAGE_SIZE = 2
-
+const PAGE_SIZE = 10
+const common = require('./common')
+const handle_response = require('../common/handle_response');
 var router = express.Router()
 var AddressModel = require("../models/address.js")
 var jwt = require('jsonwebtoken');
+// const { response } = require('express');
 
-router.get('/', (req, res, next) => {
+router.get('/', async (req, res, next) => {
+    skip = 0
     var address_fields = [
         'city',
         'district',
@@ -18,14 +21,18 @@ router.get('/', (req, res, next) => {
             dict[i] = req.body[i]
         }
     }
-    console.log(dict)
-    AddressModel.find(dict, (err, address) => {
-        return res.json({
-            'error_code': 200,
-            'message': 'Success',
-            'data': address
-        })
-    })
+    total_address = await common.find_and_count_entity(AddressModel, dict)
+    address = await common.get_all_entity(AddressModel, dict, 0, total_address)
+    response_data = handle_response.success_ls(address, total_address, 1)
+    return res.json(response_data)
+    // console.log(dict)
+    // AddressModel.find(dict, (err, address) => {
+    //     return res.json({
+    //         'error_code': 200,
+    //         'message': 'Success',
+    //         'data': address
+    //     })
+    // })
 })
 
 router.post('/create', (req, res, next) => {
