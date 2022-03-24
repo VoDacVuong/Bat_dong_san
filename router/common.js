@@ -1,4 +1,6 @@
 const nodemailer = require('nodemailer')
+const handle_response = require('../common/handle_response.js')
+const emailRegexp = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
 const smtpTransport = nodemailer.createTransport({
     service: 'gmail',
     auth: {
@@ -86,4 +88,11 @@ module.exports.get_news_by_username = function (username, projection = {}) {
 
 module.exports.get_news_by_uid = function (uid) {
     return NewsModel.findOne({ uid: uid })
+}
+
+module.exports.validate_email = async function (res, email) {
+    if (!emailRegexp.test(email)) {
+        response = handle_response.error(message = 'Invalid email !')
+        return res.json(response)
+    }
 }

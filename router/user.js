@@ -23,7 +23,7 @@ var TokenModel = require("../models/token.js")
 var NewsModel = require("../models/news.js")
 var jwt = require('jsonwebtoken');
 const handle_response = require('../common/handle_response');
-
+const user_utils = require('../common/user.js')
 
 router.post("/", async (req, res, next) => {
     var page = parseInt(req.body.page) || 1
@@ -107,24 +107,15 @@ router.post("/register", upload.single('avatar'), async (req, res) => {
     var phone = req.body.phone || ''
     var avatar = common.get_file(req)
 
-    if (!username || !password || !email) {
-        return res.json({
-            'error_code': 400,
-            'message': 'Vui long nhap day du thong tin username, password và email !',
-            'data': []
-        })
-    }
-
+    await user_utils.check_missing_data(res, username, password, email)
+    await common.validate_email(res, email)
     UserModel.findOne({
         username: username
     })
         .then(data => {
             if (data) {
-                return res.json({
-                    'error_code': 400,
-                    'message': 'Username da ton tai!',
-                    'data': []
-                })
+                response_data = handle_response.error(message = 'Username already exist')
+                return res.json(response_data)
             }
             else {
                 UserModel.create({
@@ -136,11 +127,8 @@ router.post("/register", upload.single('avatar'), async (req, res) => {
 
                 }, (err, user) => {
                     if (err) {
-                        return res.json({
-                            'error_code': 400,
-                            'message': 'Thông tin nhập không chính xác !',
-                            'data': []
-                        })
+                        response_data = handle_response.error(message = 'Incorrect information')
+                        return res.json(response_data)
                     }
                     var token = jwt.sign({ 'username': user.username }, 'secret')
                     TokenModel.create({
