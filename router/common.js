@@ -19,6 +19,10 @@ module.exports.check_token = async function (req) {
     return await TokenModel.findOne({ 'token': req.body.token, 'status': true });
 }
 
+module.exports.get_token = function (token) {
+    return TokenModel.findOne({ 'token': token, 'status': true });
+}
+
 module.exports.check_admin = async function (token) {
     token_qs = await TokenModel.findOne({ 'token': token, 'status': true }) || ''
     return UserModel.findOne({ 'username': token_qs.username, 'activate': true, 'role': 'ADMIN' });
@@ -72,6 +76,9 @@ module.exports.send_mail = async function () {
 
 module.exports.get_all_entity = function (entity, dict, skip, page_size, projection = {}) {
     return entity.find(dict, projection).skip(skip).limit(page_size).sort({ created_at: -1 })
+}
+module.exports.get_all_entity_ = function (entity, projection = {}) {
+    return entity.find({}, projection)
 }
 
 module.exports.count_entity = function (model) {

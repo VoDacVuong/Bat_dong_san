@@ -49,7 +49,7 @@ router.post('/create', (req, res, next) => {
         if (err) {
             return res.json({
                 'error_code': 400,
-                'message': 'Vui lòng nhập chính xác thông tin !',
+                'message': 'Incorrect information',
                 'data': []
             })
         }
