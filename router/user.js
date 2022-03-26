@@ -310,7 +310,7 @@ router.post('/login', (req, res, next) => {
 })
 
 // get profile
-router.get('/profile', async (req, res, next) => {
+router.get('/get_profile', async (req, res, next) => {
     uid = req.query.uid
     user = await common.get_user_by_uid(uid)
     response_data = handle_response.success(user)
@@ -352,6 +352,19 @@ router.get('/profile', async (req, res, next) => {
     //         })
     //     })
     // })
+})
+
+router.get('/profile', async (req, res, next) => {
+    token = await common.check_token(req)
+    console.log(token)
+    if (!token) {
+        response_data = handle_response.error(message = 'User not found')
+        return res.json(response_data)
+    }
+    user = await common.get_user_by_username(token.username)
+    // console.log(user)
+    response_data = handle_response.success(data = user)
+    return res.json(response_data)
 })
 
 // get news by user
