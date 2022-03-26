@@ -19,43 +19,43 @@ const { none, array } = require('./upload');
 const fileSystem = require('fs');
 const { vary } = require('express/lib/response');
 var router = express.Router()
-var json2csv = require('json2csv').Parser
-var fastcsv = require('fast-csv')
-const objectstocsv = require('objects-to-csv')
+// var json2csv = require('json2csv').Parser
+// var fastcsv = require('fast-csv')
+// const objectstocsv = require('objects-to-csv')
 
-router.get('/export', async (req, res, next) => {
-    await NewsModel.find({}).lean().exec((err, data) => {
-        if (err) throw err;
-        const csvFields = ['_id', 'username', 'password']
-        console.log(csvFields);
-        const json2csvParser = new Json2csvParser({
-            csvFields
-        });
-        const csvData = json2csvParser.parse(data);
-        fs.writeFile("bezkoder_mongodb_fs.csv", csvData, function (error) {
-            if (error) throw error;
-            console.log("Write to bezkoder_mongodb_fs.csv successfully!");
-        });
-        res.send('File downloaded Successfully')
-    });
+// router.get('/export', async (req, res, next) => {
+//     await NewsModel.find({}).lean().exec((err, data) => {
+//         if (err) throw err;
+//         const csvFields = ['_id', 'username', 'password']
+//         console.log(csvFields);
+//         const json2csvParser = new Json2csvParser({
+//             csvFields
+//         });
+//         const csvData = json2csvParser.parse(data);
+//         fs.writeFile("bezkoder_mongodb_fs.csv", csvData, function (error) {
+//             if (error) throw error;
+//             console.log("Write to bezkoder_mongodb_fs.csv successfully!");
+//         });
+//         res.send('File downloaded Successfully')
+//     });
 
 
-    // data = [
-    //     { code: '1', name: 'Nguyen Van An' },
-    //     { code: '2', name: 'Nguyen Van Teo' },
-    //     { code: '3', name: 'Nguyen Van Ti' }
-    // ]
-    // data1 = []
-    // news = await common.get_all_entity_(NewsModel, { address: 0, img_info: 0, _id: 0, __v: 0 })
-    // for (var i in data) {
-    //     data1.push(data[i])
-    // }
-    // // console.log(news.toArray())
-    // const csv = new objectstocsv(data1)
-    // await csv.toDisk('./test.csv')
-    // // console.log(await csv.toString())
-    // res.download('./test.csv')
-})
+//     // data = [
+//     //     { code: '1', name: 'Nguyen Van An' },
+//     //     { code: '2', name: 'Nguyen Van Teo' },
+//     //     { code: '3', name: 'Nguyen Van Ti' }
+//     // ]
+//     // data1 = []
+//     // news = await common.get_all_entity_(NewsModel, { address: 0, img_info: 0, _id: 0, __v: 0 })
+//     // for (var i in data) {
+//     //     data1.push(data[i])
+//     // }
+//     // // console.log(news.toArray())
+//     // const csv = new objectstocsv(data1)
+//     // await csv.toDisk('./test.csv')
+//     // // console.log(await csv.toString())
+//     // res.download('./test.csv')
+// })
 
 router.get('/city', (req, res, next) => {
     NewsModel.find({}, (err, news) => {
