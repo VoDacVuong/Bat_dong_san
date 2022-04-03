@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const { number } = require('sharp/lib/is');
+const { number, object } = require('sharp/lib/is');
 mongoURL = process.env.MONGO_URL || 'mongodb://localhost/BDS'
 mongoose.connect(mongoURL);
 console.log("Connected News")
@@ -64,12 +64,18 @@ const NewsSchema = new Schema({
         type: Number,
         default: 0
     },
-    note: String,
+    note: {
+        type: String,
+        default: ''
+    },
     created_at: {
         type: Date,
         default: Date.now
     },
-    owner: Object
+    owner: {
+        type: Object,
+        default: null
+    }
 }, {
     collection: 'news'
 });

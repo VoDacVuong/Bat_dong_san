@@ -9,6 +9,7 @@ var bodyParser = require('body-parser')
 var user = require("./router/user.js")
 var news = require("./router/news.js")
 var address = require("./router/address.js")
+var token = require("./router/token.js")
 var cors = require('cors')
 var comment = require("./router/comment.js")
 // var multer = require('multer');
@@ -31,6 +32,7 @@ app.use("/api/v1/user/", user)
 app.use("/api/v1/news/", news)
 app.use("/api/v1/address/", address)
 app.use("/api/v1/comments/", comment)
+app.use('/api/v1/tokens/', token)
 
 // active account
 app.get('/api/v1/user/:active', async (req, res) => {

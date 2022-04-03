@@ -20,7 +20,7 @@ module.exports.check_token = async function (req) {
 }
 
 module.exports.get_token = function (token) {
-    return TokenModel.findOne({ 'token': token, 'status': true });
+    return TokenModel.findOne({ 'token': token });
 }
 
 module.exports.check_admin = async function (token) {
