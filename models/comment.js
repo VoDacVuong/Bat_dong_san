@@ -7,12 +7,12 @@ const timestamp = Date.now();
 const Schema = mongoose.Schema;
 
 const CommentSchema = new Schema({
-    news: {
+    entity: {
         type: String,
         require: true
     },
     message: String,
-    user: {
+    creator: {
         type: String,
         default: ''
     },

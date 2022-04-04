@@ -12,7 +12,8 @@ const smtpTransport = nodemailer.createTransport({
 var UserModel = require("../models/user.js")
 var TokenModel = require("../models/token.js")
 var NewsModel = require("../models/news.js")
-const { json } = require('express/lib/response')
+const { json } = require('express/lib/response');
+const res = require('express/lib/response');
 
 
 module.exports.check_token = async function (req) {
@@ -101,5 +102,15 @@ module.exports.validate_email = async function (res, email) {
     if (!emailRegexp.test(email)) {
         response = handle_response.error(message = 'Invalid email !')
         return res.json(response)
+    }
+}
+
+module.exports.validate_field_not_null = async function (req, res, list_field = []) {
+    for (var field of list_field) {
+        console.log(field)
+        if (!req.body[field]) {
+            response_data = handle_response.error(message = 'Required fields cannot be empty')
+            return res.json(response_data)
+        }
     }
 }

@@ -12,6 +12,8 @@ var address = require("./router/address.js")
 var token = require("./router/token.js")
 var cors = require('cors')
 var comment = require("./router/comment.js")
+var newspaper = require('./router/newspaper.js')
+const appRootPath = require('app-root-path')
 // var multer = require('multer');
 // var upload = multer();
 
@@ -33,6 +35,7 @@ app.use("/api/v1/news/", news)
 app.use("/api/v1/address/", address)
 app.use("/api/v1/comments/", comment)
 app.use('/api/v1/tokens/', token)
+app.use('/api/v1/newspaper', newspaper)
 
 // active account
 app.get('/api/v1/user/:active', async (req, res) => {

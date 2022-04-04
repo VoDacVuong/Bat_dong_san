@@ -123,7 +123,8 @@ router.post("/register", upload.single('avatar'), async (req, res) => {
                     username: username,
                     password: password,
                     email: email,
-                    avatar: avatar
+                    avatar: avatar,
+                    phone: phone
 
                 }, (err, user) => {
                     if (err) {
