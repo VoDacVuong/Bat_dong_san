@@ -122,6 +122,8 @@ router.post("/register", upload.single('avatar'), async (req, res) => {
                     uid: uuid.v4(),
                     username: username,
                     password: password,
+                    fullname: fullname,
+                    gender: gender,
                     email: email,
                     avatar: avatar,
                     phone: phone
