@@ -114,3 +114,23 @@ module.exports.validate_field_not_null = async function (req, res, list_field = 
         }
     }
 }
+
+module.exports.random_number = function (length) {
+    return Math.random().toString().substr(2, length);  // 60502138
+}
+
+module.exports.check_password = async function (password_old, user) {
+    await bcrypt.compare(password_old, user.password, (err, isMatch)=>{
+        console.log(isMatch)
+        return isMatch
+    })
+}
+
+module.exports.check_empty_field = async function (...fields) {
+    for (let i = 0; i < fields.length; i++) {
+        if (!fields[i]) {
+            return false
+        }
+    }
+    return true
+}

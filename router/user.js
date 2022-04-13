@@ -365,7 +365,7 @@ router.get('/profile', async (req, res, next) => {
     token = await common.check_token(req)
     console.log(token)
     if (!token) {
-        response_data = handle_response.error(message = 'User not found1')
+        response_data = handle_response.error(message = 'User not found')
         return res.json(response_data)
     }
     user = await common.get_user_by_username(token.username)
@@ -511,5 +511,29 @@ router.post('/logout', async (req, res, next) => {
 //     var duongdanfile = path.join(__dirname, 'home.html')
 //     res.sendFile(duongdanfile)
 // })
+
+router.post('/change_password', async (req, res, next) => {
+    token = await common.check_token(req)
+    password_old = req.body.password_old
+    password_new = req.body.password_new
+
+    if(!token){
+        response_data = handle_response.error(message = 'User not found')
+        return res.json(response_data)
+    }
+    else{
+        user = await common.get_user_by_username(token.username)
+        await bcrypt.compare(password_old, user.password, (err, isMatch)=>{
+            if(!isMatch){
+                response_data = handle_response.error("incorrect password")
+                return res.json(response_data)
+            }
+            user.password = password_new
+            user.save()
+            response_data = handle_response.success(data=user)
+            return res.json(response_data)
+        })
+    }
+})
 
 module.exports = router
