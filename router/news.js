@@ -366,7 +366,7 @@ router.post('/update', upload.array('imgs', 10), (req, res, next) => {
             news.save()
 
             return res.json({
-                'error_code': 400,
+                'error_code': 200,
                 'message': 'Success',
                 'data': news
             })
