@@ -103,69 +103,6 @@ router.post('/', async (req, res, next) => {
     news = await common.get_all_entity(NewsModel, dict, skip, page_size)
     response = handle_response.success_ls(news, total_news, Math.ceil(total_news / page_size))
     return res.json(response)
-    // NewsModel.find(dict)
-    //     .sort({
-    //         created_at: '-1'
-    //     })
-    //     .skip(skip)
-    //     .limit(page_size)
-    //     .then(news => {
-    //         var tongSoPage = Math.ceil(news.length / page_size)
-    //         return res.json({
-    //             'error_code': 200,
-    //             'total': news.length,
-    //             'total_page': tongSoPage,
-    //             'message': 'Success',
-    //             'data': news
-    //         })
-    //     })
-    // if (page) {
-    //     page = parseInt(page)
-    //     if (page < 1) {
-    //         page = 1
-    //     }
-    //     var skip = (page - 1) * PAGE_SIZE
-    //     NewsModel.find({})
-    //         .skip(skip)
-    //         .limit(PAGE_SIZE)
-    //         .then(data => {
-    //             NewsModel.countDocuments({}).then((total) => {
-    //                 var tongSoPage = Math.ceil(total / PAGE_SIZE)
-    //                 return res.json({
-    //                     'total': total,
-    //                     'total_page': tongSoPage,
-    //                     'message': 'Success',
-    //                     'data': data
-    //                 })
-    //             })
-    //         })
-    //         .catch(err => {
-    //             return res.json({
-    //                 'message': 'Loi phan trang !',
-    //                 'data': []
-    //             })
-    //         })
-    // }
-    // else {
-    //     NewsModel.find({})
-    //         .then(data => {
-    //             NewsModel.countDocuments({}).then((total) => {
-    //                 var tongSoPage = Math.ceil(total / PAGE_SIZE)
-    //                 return res.json({
-    //                     'total': total,
-    //                     'total_page': tongSoPage,
-    //                     'message': 'Success',
-    //                     'data': data
-    //                 })
-    //             })
-    //         })
-    //         .catch(err => {
-    //             return res.json({
-    //                 'message': 'Contact admin for support',
-    //                 'data': []
-    //             })
-    //         })
-    // }
 })
 
 // upload ảnh

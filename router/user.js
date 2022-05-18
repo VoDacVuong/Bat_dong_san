@@ -536,4 +536,54 @@ router.post('/change_password', async (req, res, next) => {
     }
 })
 
+router.post('/login_admin', async(req, res, next) =>{
+    var username = req.body.username
+    var password = req.body.password
+
+    UserModel.findOne({
+        username: username,
+        activate: true,
+        role: 'ADMIN'
+    }, (err, user) => {
+        if (!user) {
+            response_data = handle_response.error(message = 'Account not found !')
+            return res.json(response_data)
+        }
+        bcrypt.compare(password, user.password, (err, isMatch) => {
+            if (!isMatch) {
+                return res.json({
+                    'error_code': 400,
+                    'message': 'Vui lòng kiểm tra lại mật khẩu !',
+                    'data': []
+                })
+            }
+            var token = jwt.sign({ 'username': username }, 'secret')
+            // var dulieu = jwt.verify(token, 'secret')
+            // console.log(dulieu)
+            TokenModel.updateMany({ username: username }, { status: false })
+                .then(data => {
+                    TokenModel.create({
+                        username: username,
+                        token: token,
+                        status: true
+                    })
+                })
+            return res.json({
+                'error_code': 200,
+                'message': 'Success',
+                'token': token,
+                'data': {
+                    uid: user.uid,
+                    activate: user.activate,
+                    username: user.username,
+                    fullname: user.fullname,
+                    role: user.role,
+                    gender: user.gender,
+                    phone: user.phone,
+                    avatar: user.avatar
+                }
+            })
+        })
+    })
+})
 module.exports = router
