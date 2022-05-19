@@ -12,7 +12,7 @@ const nodemailer = require('nodemailer')
 const smtpTransport = nodemailer.createTransport({
     service: 'gmail',
     auth: {
-        user: 'acc.deviuh@gmail.com',
+        user: 'vuongit2905r@gmail.com',
         pass: 'Vuong2905m'
     }
 })
@@ -30,7 +30,8 @@ router.post("/", async (req, res, next) => {
     var page_size = parseInt(req.body.page_size) || PAGE_SIZE
 
     var user_fields = [
-        'activate'
+        'activate',
+        'role'
     ]
     var dict = {}
     for (var i of user_fields) {
@@ -109,66 +110,64 @@ router.post("/register", upload.single('avatar'), async (req, res) => {
 
     await user_utils.check_missing_data(res, username, password, email)
     await common.validate_email(res, email)
-    UserModel.findOne({
-        username: username
-    })
-        .then(data => {
-            if (data) {
-                response_data = handle_response.error(message = 'Username already exist')
-                return res.json(response_data)
-            }
-            else {
-                UserModel.create({
-                    uid: uuid.v4(),
-                    username: username,
-                    password: password,
-                    fullname: fullname,
-                    gender: gender,
-                    email: email,
-                    avatar: avatar,
-                    phone: phone
+    
+    account = await common.get_user_by_username(username)
+    if(account){
+        response_data = handle_response.error(message = 'Username already exist')
+        return res.json(response_data)
+    }
 
-                }, (err, user) => {
-                    if (err) {
-                        response_data = handle_response.error(message = 'Incorrect information')
-                        return res.json(response_data)
-                    }
-                    var token = jwt.sign({ 'username': user.username }, 'secret')
-                    TokenModel.create({
-                        token: token,
-                        username: username,
-                        status: true
-                    })
-                        .then(data => {
-                            var mailOptions = {
-                                from: 'acc.deviuh@gmail.com',
-                                to: email,
-                                subject: 'Active account',
-                                text: 'Xin chào ' + username + '. Để kích hoạt tài khoản của bạn vui lòng xác nhận: ' + 'http://' + req.headers.host + '/api/v1/user/active?username=' + username
-                            };
-                            smtpTransport.sendMail(mailOptions, (err, info) => {
-                                if (err) {
-                                    console.log(err)
-                                    return res.json({
-                                        'error_code': 400,
-                                        'message': 'Contact admin for support',
-                                        'data': []
-                                    })
-                                }
-                                else {
-                                    console.log('Email sent: ' + info.response);
-                                }
+    UserModel.create({
+        uid: uuid.v4(),
+        username: username,
+        password: password,
+        fullname: fullname,
+        gender: gender,
+        email: email,
+        avatar: avatar,
+        phone: phone
+    }, (error, user) =>{
+        if(error){
+            response_data = handle_response.error(message = 'Incorrect information')
+            return res.json(response_data)
+        }
+        else{
+            var token = jwt.sign({ 'username': user.username }, 'secret')
+            TokenModel.create({
+                token: token,
+                username: username,
+                status: true
+            })
+                .then(data => {
+                    var mailOptions = {
+                        from: 'acc.deviuh@gmail.com',
+                        to: email,
+                        subject: 'Active account',
+                        text: 'Xin chào ' + username + '. Để kích hoạt tài khoản của bạn vui lòng xác nhận: ' + 'http://' + req.headers.host + '/api/v1/user/active?username=' + username
+                    };
+                    smtpTransport.sendMail(mailOptions, (err, info) => {
+                        if (err) {
+                            console.log(err)
+                            return res.json({
+                                'error_code': 400,
+                                'message': 'Contact admin for support',
+                                'data': []
                             })
+                        }
+                        else {
+                            console.log('Email sent: ' + info.response);
                             return res.json({
                                 'error_code': 200,
                                 // 'token': token,
                                 'message': 'Success',
                                 'data': []
                             })
-                        })
+                        }
+                    })
+                    
                 })
-            }
-        })
+        }
+    })
 })
 
 // update tai khoan
@@ -536,6 +535,7 @@ router.post('/change_password', async (req, res, next) => {
     }
 })
 
+// login account ADMIN
 router.post('/login_admin', async(req, res, next) =>{
     var username = req.body.username
     var password = req.body.password
@@ -586,4 +586,24 @@ router.post('/login_admin', async(req, res, next) =>{
         })
     })
 })
+
+router.post('/promote', async(req, res, next) =>{
+    token = req.body.token
+    uid = req.body.uid
+    
+    if(!await common.check_admin(token)){
+        response_data = handle_response.error(message = 'Permission denied !')
+        return res.json(response_data)
+    }
+
+    user = await common.get_user_by_uid(uid)
+    if(!user){
+        response_data = handle_response.error(message = 'User not found !')
+        return res.json(response_data)
+    }
+    await common.promote(user)
+    response_data = handle_response.success([])
+    return res.json(response_data)
+})
+
 module.exports = router

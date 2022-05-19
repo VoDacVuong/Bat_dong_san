@@ -42,6 +42,10 @@ module.exports.deactivate_user = async function (user) {
     await UserModel.findOneAndUpdate({ 'username': user.username }, { 'activate': false });
 }
 
+module.exports.promote = async function(user){
+    await UserModel.findOneAndUpdate({'username': user.username}, {'role': 'ADMIN'})
+}
+
 module.exports.get_news_by_uid = async function (uid) {
     return await NewsModel.findOne({ 'uid': uid });
 }
@@ -78,7 +82,7 @@ module.exports.send_mail = async function () {
 module.exports.get_all_entity = function (entity, dict, skip, page_size, projection = {}) {
     return entity.find(dict, projection).skip(skip).limit(page_size).sort({ created_at: -1 })
 }
-module.exports.get_all_entity_ = function (entity, projection = {}) {
+module.exports.get_entity = function (entity, projection = {}) {
     return entity.find({}, projection)
 }
 
@@ -134,3 +138,4 @@ module.exports.check_empty_field = async function (...fields) {
     }
     return true
 }
+
