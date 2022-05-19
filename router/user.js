@@ -12,7 +12,7 @@ const nodemailer = require('nodemailer')
 const smtpTransport = nodemailer.createTransport({
     service: 'gmail',
     auth: {
-        user: 'vuongit2905r@gmail.com',
+        user: 'acc.deviuh@gmail.com',
         pass: 'Vuong2905m'
     }
 })
