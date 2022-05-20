@@ -348,6 +348,52 @@ router.post('/delete', (req, res, next) => {
 
 })
 
+router.post('/restore', async(req, res, next) =>{
+    uid = req.body.uid
+    token = req.body.token
+    TokenModel.findOne({
+        token: token,
+        status: true
+    }, (err, token) => {
+        if (!token) {
+            response_data = handle_response.error(message = 'Please login, or the token has expired !')
+            return res.json(response_data)
+        }
+        NewsModel.findOne({
+            uid: uid
+        }, (err, news) => {
+            if (!news) {
+                response_data = handle_response.error(message = 'News not found !')
+            }
+            news.status = true
+            news.save()
+            response_data = handle_response.success(data = news)
+            return res.json(response_data)
+        })
+    })
+})
 
+// get news by user (admin)
+router.post('/user', async (req, res, next) =>{
+    var page = parseInt(req.body.page) || 1
+    var page_size = parseInt(req.body.page_size) || PAGE_SIZE
+    uid_user = req.body.uid_user
+
+    user = await common.get_user_by_uid(uid_user)
+    if(!user){
+        response_data = handle_response.error(message = 'User not found !')
+        return res.json(response_data)
+    }
+
+    dict = {
+        username: user.username
+    }
+
+    var skip = (page - 1) * page_size
+    total_news = await common.find_and_count_entity(NewsModel, dict)
+    news = await common.get_all_entity(NewsModel, dict, skip, page_size)
+    response = handle_response.success_ls(news, total_news, Math.ceil(total_news / page_size))
+    return res.json(response)
+})
 
 module.exports = router

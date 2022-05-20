@@ -606,4 +606,42 @@ router.post('/promote', async(req, res, next) =>{
     return res.json(response_data)
 })
 
+router.post('/block', async(req, res, next) =>{
+    token = req.body.token
+    uid = req.body.uid
+    
+    if(!await common.check_admin(token)){
+        response_data = handle_response.error(message = 'Permission denied !')
+        return res.json(response_data)
+    }
+
+    user = await common.get_user_by_uid(uid)
+    if(!user){
+        response_data = handle_response.error(message = 'User not found !')
+        return res.json(response_data)
+    }
+    await common.block_user(user)
+    response_data = handle_response.success([])
+    return res.json(response_data)
+})
+
+router.post('/unblock', async(req, res, next) =>{
+    token = req.body.token
+    uid = req.body.uid
+    
+    if(!await common.check_admin(token)){
+        response_data = handle_response.error(message = 'Permission denied !')
+        return res.json(response_data)
+    }
+
+    user = await common.get_user_by_uid(uid)
+    if(!user){
+        response_data = handle_response.error(message = 'User not found !')
+        return res.json(response_data)
+    }
+    await common.unblock_user(user)
+    response_data = handle_response.success([])
+    return res.json(response_data)
+})
+
 module.exports = router

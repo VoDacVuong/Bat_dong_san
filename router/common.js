@@ -46,6 +46,14 @@ module.exports.promote = async function(user){
     await UserModel.findOneAndUpdate({'username': user.username}, {'role': 'ADMIN'})
 }
 
+module.exports.block_user = async function(user){
+    await UserModel.findOneAndUpdate({username: user.username}, {'activate': false})
+}
+
+module.exports.unblock_user = async function(user){
+    await UserModel.findOneAndUpdate({username: user.username}, {'activate': true})
+}
+
 module.exports.get_news_by_uid = async function (uid) {
     return await NewsModel.findOne({ 'uid': uid });
 }
