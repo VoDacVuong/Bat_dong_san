@@ -12,6 +12,7 @@ const smtpTransport = nodemailer.createTransport({
 var UserModel = require("../models/user.js")
 var TokenModel = require("../models/token.js")
 var NewsModel = require("../models/news.js")
+var NewspaperMode = require("../models/newspaper.js")
 const { json } = require('express/lib/response');
 const res = require('express/lib/response');
 
@@ -147,3 +148,6 @@ module.exports.check_empty_field = async function (...fields) {
     return true
 }
 
+module.exports.get_newspaper_by_uid = async function (uid) {
+    return await NewspaperMode.findOne({ 'uid': uid });
+}

@@ -23,6 +23,10 @@ const NewspaperSchema = new Schema({
         type: String,
         default: ''
     },
+    status: {
+        type: Boolean,
+        default: true
+    },
     creator: {
         type: String,
         require: true

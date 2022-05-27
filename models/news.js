@@ -72,6 +72,10 @@ const NewsSchema = new Schema({
         type: Date,
         default: Date.now
     },
+    block:{
+        type: Boolean,
+        default: true
+    },
     owner: {
         type: Object,
         default: null
