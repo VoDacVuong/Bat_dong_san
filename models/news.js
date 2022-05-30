@@ -74,7 +74,7 @@ const NewsSchema = new Schema({
     },
     block:{
         type: Boolean,
-        default: true
+        default: false
     },
     owner: {
         type: Object,

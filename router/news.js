@@ -85,9 +85,12 @@ router.post('/', async (req, res, next) => {
         'price',
         'city',
         'district',
-        'street'
+        'street',
+        'block'
     ]
     var dict = {}
+    // dict['block'] = 'false'
+    // dict['status'] = 'true'
     for (var i of news_fields) {
         if (req.body[i] != undefined) {
             if (i === 'city' || i == 'district' || i == 'street') {
@@ -130,6 +133,7 @@ router.post('/create', upload.array('imgs', 10), (req, res, next) => {
     var acreage = req.body.acreage
     var bedroom_no = req.body.bedroom_no
     var bathroom_no = req.body.bathroom_no
+    var note = req.body.note
     // upload hinh anh
     const files = req.files
     console.log(files)
@@ -172,7 +176,8 @@ router.post('/create', upload.array('imgs', 10), (req, res, next) => {
                     img_info: array_IMG,
                     acreage: acreage,
                     bedroom_no: bedroom_no,
-                    bathroom_no: bathroom_no
+                    bathroom_no: bathroom_no,
+                    note: note
                 })
                     .then(data => {
                         return res.json({

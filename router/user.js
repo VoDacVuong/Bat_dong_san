@@ -644,4 +644,24 @@ router.post('/unblock', async(req, res, next) =>{
     return res.json(response_data)
 })
 
+router.post('/block_news', async (req, res, next) =>{
+    token = req.body.token
+    uid = req.body.uid_news
+    
+    if(!await common.check_admin(token)){
+        response_data = handle_response.error(message = 'Permission denied !')
+        return res.json(response_data)
+    }
+
+    news = await common.get_news_by_uid(uid)
+    if(!news){
+        response_data = handle_response.error(message = 'News not found !')
+        return res.json(response_data)
+    }
+
+    await common.block_news(news)
+    response_data = handle_response.success([])
+    return res.json(response_data)
+})
+
 module.exports = router

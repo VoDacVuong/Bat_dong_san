@@ -151,3 +151,11 @@ module.exports.check_empty_field = async function (...fields) {
 module.exports.get_newspaper_by_uid = async function (uid) {
     return await NewspaperMode.findOne({ 'uid': uid });
 }
+
+module.exports.block_news = async function(news){
+    await NewsModel.findOneAndUpdate({uid: news.uid}, {'block': true})
+}
+
+module.exports.unblock_news = async function(news){
+    await NewsModel.findOneAndUpdate({uid: news.uid}, {'block': false})
+}
